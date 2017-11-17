@@ -16,7 +16,7 @@ Thumbnail::Thumbnail(Asset * _ref) {
 	didDrop = false;
 	isOver = false;
 	isPressed = false;
-	width = MIN(100, ref->getWidth());
+	width = MIN(THUMBNAIL_WIDTH, ref->getWidth());
 	height = width * ref->getRatio();
 	
 	if (height > MAX_THUMBNAIL_HEIGHT) {

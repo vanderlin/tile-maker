@@ -249,8 +249,8 @@ namespace TileMaker {
 				shape->worldOffset.set(x, y);
 			}
 		}
+		
 		void drawUI() {
-			
 			ofRectangle uiRect(0, worldRect.y, worldRect.x, worldRect.height-0);
 			ofFill();
 			ofSetColor(COLOR_UI_BACKGROUND);
@@ -261,6 +261,7 @@ namespace TileMaker {
 			float scalePct = scale * 100;
 			ofDrawBitmapStringHighlight("Scale X " + ofToString(scalePct, 1)+"%", 20, ofGetHeight()-15);
 		}
+		
 		void drawBackground() {
 			ofPoint pos = getCanvasPosition();
 			ofFill();

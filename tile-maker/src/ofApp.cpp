@@ -5,7 +5,10 @@ void ofApp::setup() {
 	
 	ofBackground(96);
 
-	gui.setup("App", "gui.xml", 10, 10);
+	gui.setup("App", "gui.xml");
+	gui.setSize(UI_WIDTH-1, ofGetHeight()-UI_WIDTH-1);
+	gui.setDefaultWidth(UI_WIDTH-1);
+	gui.setPosition(1, 130);
 	params.setName("tile maker");
 	params.add(canvas.scale.set("scale", 1, 0.1, 50));
 
@@ -68,7 +71,7 @@ void ofApp::update() {
 		x += thumbnail->getWidth();
 	}
 	
-	canvas.update(ofRectangle(120, thumbnailBounds.height, ofGetWidth()-120, ofGetHeight()-thumbnailBounds.height));
+	canvas.update(ofRectangle(UI_WIDTH, thumbnailBounds.height, ofGetWidth()-UI_WIDTH, ofGetHeight()-thumbnailBounds.height));
 }
 
 //--------------------------------------------------------------

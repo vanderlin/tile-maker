@@ -5,6 +5,7 @@
 #include "Utils.h"
 #include "ofxGuiExtensions.h"
 
+#include "AppGlobals.h"
 #include "Cursor.h"
 #include "Canvas.h"
 #include "Thumbnail.h"
