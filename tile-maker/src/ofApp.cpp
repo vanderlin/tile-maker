@@ -1,49 +1,43 @@
 #include "ofApp.h"
 
-ofImage image;
-ofRectangle bounds;
-
-Shape * testShape;
-
 //--------------------------------------------------------------
 void ofApp::setup() {
 	
-	ofBackground(54);
+	ofBackground(96);
 
 	gui.setup("App", "gui.xml", 10, 10);
 	params.setName("tile maker");
-	params.add(zoom.set("zoom", 1, 0.1, 50));
+	params.add(canvas.scale.set("scale", 1, 0.1, 50));
 
 	gui.add(params);
 	
 	// listen to any param changes
 	ofAddListener(params.parameterChangedE(), this, &ofApp::onParamChanged);
 	
-	
-	image.load("octopus-forever.jpg");
-	
-	
+	// for now this is hard coded
+	// we can add a open files option
 	ofDirectory dir;
-	dir.listDir("crops");
+	dir.listDir("assets/crops");
 	for (int i=0; i<dir.size(); i++) {
 		assets.push_back(new Asset(dir.getPath(i)));
 	}
+	
+	// create thumbnail refs
 	for(auto asset : assets) {
 		thumbnails.push_back(new Thumbnail(asset));
 	}
+	thumbnailBounds.set(0, 0, ofGetWidth(), 130);
+	thumbnailIndex = thumbnails.size() ? 0 : -1;
 	
+	
+	// not sure about this right now
+	// we are making a 1000x1000px file
 	int w = 1000; // in pixels
 	canvas.setSize(w, w);
 	
-	testShape = NULL;
-	//testShape = assets[(int)ofRandom(assets.size()-1)];
-	//testShape->setPosition(100, 100);
-	
-	//canvas.addShape(new Shape(thumbnails[4]->ref, 300, 210));
-	
 	// load the gui from a file
+	// add and shapes in the canavas
 	load();
-	
 }
 
 //--------------------------------------------------------------
@@ -65,19 +59,22 @@ void ofApp::onParamChanged(ofAbstractParameter &value) {
 void ofApp::update() {
 	float x = 0;
 	float y = 0;
+	float offsetX = 0;
+	for (int i=0; i<thumbnailIndex; i++) {
+		offsetX += thumbnails[i]->getWidth();
+	}
 	for(auto thumbnail : thumbnails) {
-		thumbnail->setPosition(x, y);
+		thumbnail->setPosition(x - offsetX, y);
 		x += thumbnail->getWidth();
 	}
 	
+	canvas.update(ofRectangle(120, thumbnailBounds.height, ofGetWidth()-120, ofGetHeight()-thumbnailBounds.height));
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-	canvas.update();
-	for(auto thumbnail : thumbnails) {
-		thumbnail->draw();
-	}
+	
+	canvas.drawBackground();
 	
 	canvas.begin();
 	for(auto shape : canvas.shapes) {
@@ -85,15 +82,28 @@ void ofApp::draw() {
 	}
 	canvas.end();
 	
-	canvas.setZoom(zoom);
-	canvas.draw();
+	canvas.drawUI();
 	canvas.drawMiniMap();
 	
-	ofSetColor(255, 0, 52);
-	ofDrawRectangle(canvas);
+	/*ofSetColor(255, 0, 52);
+	ofNoFill();
+	ofDrawRectangle(canvas);*/
 	
 	if(!hideGui) gui.draw();
 	
+	// render the thumbnails back
+	ofSetColor(COLOR_UI_BACKGROUND);
+	ofFill();
+	ofDrawRectangle(thumbnailBounds);
+	ofSetColor(COLOR_UI_BORDER);
+	ofDrawLine(0, thumbnailBounds.getBottom(), ofGetWidth(), thumbnailBounds.getBottom());
+	
+	// render the thumbnails
+	for(auto thumbnail : thumbnails) {
+		thumbnail->draw();
+	}
+	
+	// app cursor
 	Cursor::draw();
 }
 
@@ -101,7 +111,6 @@ void ofApp::draw() {
 void ofApp::load() {
 	gui.loadFromFile("gui.xml");
 	if(settings.load("settings.xml")) {
-		ofLogNotice() << "settings loaded";
 		
 		settings.setTo("canvas");
 		float canvasX = ofToFloat(settings.getAttribute("x"));
@@ -130,25 +139,13 @@ void ofApp::load() {
 			}
 		}
 		settings.setToParent();
-		/*for (auto shape : canvas.shapes) {
-			
-			ofXml shapeXML;
-			shapeXML.addChild("shape");
-			shapeXML.setTo("shape");
-			shapeXML.addValue("filename", shape->ref->getFilename());
-			shapeXML.addValue("x", shape->getPosition().x);
-			shapeXML.addValue("y", shape->getPosition().y);
-			shapeXML.addValue("width", shape->getWidth());
-			shapeXML.addValue("height", shape->getHeight());
-			shapeXML.addValue("ratio", shape->ref->getRatio());
-			
-			settings.addXml(shapeXML);
-		}*/
+		ofLogNotice() << "settings loaded";
 	}
 }
 
 //--------------------------------------------------------------
 void ofApp::save() {
+	
 	gui.saveToFile("gui.xml");
 	
 	settings.clear();
@@ -188,17 +185,30 @@ void ofApp::save() {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-	canvas.keyPressed(key);
-	if (key == 't') {
-		hideGui = !hideGui;
-	}
-	if (key == 's') {
-		save();
-	}
-	if (key == 'z') {
-		zoom = 1.0;
-	}
 	
+	// scroll if we are inside the thumbnails bounds
+	if(thumbnailBounds.inside(ofGetMouse())) {
+		if(thumbnailIndex < thumbnails.size()-1 && key == '2') {
+			thumbnailIndex ++;
+		}
+		else if(thumbnailIndex > 0 && key == '1') {
+			thumbnailIndex --;
+		}
+	}
+	else {
+	
+		canvas.keyPressed(key);
+		
+		if (key == 't') {
+			hideGui = !hideGui;
+		}
+		if (key == 's') {
+			save();
+		}
+		if (key == 'z') {
+			canvas.setZoom(1);
+		}
+	}
 }
 
 //--------------------------------------------------------------
@@ -211,10 +221,9 @@ void ofApp::keyReleased(int key){
 void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
 	if(scrollY > 0 || scrollY < 0) {
 		double range = 0.01;
-		float value = zoom + ofMap(scrollY,-1, 1, -range, range);
-		value = ofClamp(value, zoom.getMin(), zoom.getMax());
-
-		zoom = value;
+		float value = canvas.scale + ofMap(scrollY,-1, 1, -range, range);
+		value = ofClamp(value, canvas.scale.getMin(), canvas.scale.getMax());
+		canvas.scale = value;
 	}
 }
 
@@ -272,7 +281,7 @@ void ofApp::mouseExited(int x, int y){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-
+	thumbnailBounds.set(0, 0, ofGetWidth(), 130);
 }
 
 //--------------------------------------------------------------

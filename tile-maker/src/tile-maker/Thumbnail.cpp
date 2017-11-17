@@ -18,6 +18,11 @@ Thumbnail::Thumbnail(Asset * _ref) {
 	isPressed = false;
 	width = MIN(100, ref->getWidth());
 	height = width * ref->getRatio();
+	
+	if (height > MAX_THUMBNAIL_HEIGHT) {
+		height = MAX_THUMBNAIL_HEIGHT;
+		width = height * ref->getRatioVertical();
+	}
 }
 
 void Thumbnail::mouseMoved(int _x, int _y ) {
@@ -67,7 +72,7 @@ void Thumbnail::draw() {
 		ofDrawRectangle(0, 0, width, height);
 	}
 	ofSetColor(255);
-	ref->image.draw(0, 0, width, height);
+	//ref->image.draw(0, 0, width, height);
 	ofNoFill();
 	ofDrawRectangle(0, 0, width, height);
 	ofPopMatrix();

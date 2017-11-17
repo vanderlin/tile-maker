@@ -17,13 +17,13 @@ Shape::Shape(Asset * _ref, float _x, float _y) {
 	isOver = false;
 	isPressed = false;
 	canRotate = false;
+	isScaling = false;
 	x = _x; y = _y;
 	width = ref->getWidth();
 	height = ref->getHeight();
 	cornerIndex = -1;
 	overCornerIndex = -1;
-	angle = 0;//ofRandom(0, 360);
-	downAngle = 0;
+	angle = 0;
 	ofRectangle rect = getRectangle();
 	
 	corners.resize(4);
@@ -188,6 +188,7 @@ void Shape::mouseDragged(int _x, int _y, int button) {
 			rotate(diff);
 		}
 		else {
+			isScaling = true;
 			float ratio = ref->getRatio();
 			float dx;
 			ofPoint anchor;
@@ -210,7 +211,17 @@ void Shape::mouseDragged(int _x, int _y, int button) {
 				anchor.y += height/2;
 			}*/
 			
-			float w = downRect.width + dx;
+			float w = round(downRect.width + dx);
+			
+			if (w < MIN_SHAPE_SIZE) {
+				w = MIN_SHAPE_SIZE;
+			}
+			
+			if (w > ref->getWidth()) {
+				w = ref->getWidth();
+			}
+			
+			ofLogNotice() << w;
 			float nw = w;
 			float nh = nw * ratio;
 			
@@ -232,7 +243,6 @@ bool Shape::mousePressed(int _x, int _y, int button) {
 	}
 	else {
 		cornerIndex = overCornerIndex;
-		downAngle = getAngleFromPoints(ofVec2f(_x, _y), getPosition());// - angle;
 		updateCursor(cornerIndex);
 	}
 	
@@ -248,6 +258,7 @@ bool Shape::mousePressed(int _x, int _y, int button) {
 //--------------------------------------------------------------
 void Shape::mouseReleased(int _x, int _y, int button) {
 	isPressed = false;
+	isScaling = false;
 	cornerIndex = -1;
 	overCornerIndex = -1;
 	updateCursor(-1);
@@ -273,14 +284,14 @@ void Shape::draw() {
 	ofTranslate(pos);
 	ofRotate(angle);
 	ofFill();
-	ofSetColor(isOver?255:100);
+	ofSetColor(isOver?200:255);
 	ofDrawRectangle(-width/2, -height/2, width, height);
 	ofSetColor(20, 100, 255);
 	ofDrawBitmapString(ofToString(orderIndex), 0, 0);
 
 	ofPopMatrix();
 
-	ofSetColor(0, isOver?255:100);
+	ofSetColor(0, isOver?255:220);
 	corners.close();
 	corners.draw();
 
@@ -290,18 +301,32 @@ void Shape::draw() {
 	for (int i=0; i<4; i++) {
 		ofPoint pnt(round(corners[i].x), round(corners[i].y));
 		ofSetColor(0);
-		ofDrawBitmapString(ofToString(i), pnt);
+		//ofDrawBitmapString(ofToString(i), pnt);
 		int overIndex = insideCorner(mouse.x, mouse.y);
 		if (overIndex == i) {
-			ofSetColor(255);
+			ofSetColor(0);
 			closeIndex = i;
 		}
 		else {
-			ofSetColor(200);
+			ofSetColor(20);
 		}
 		
 		ofSetRectMode(OF_RECTMODE_CENTER);
 		ofDrawRectangle(pnt, 10, 10);
 		ofSetRectMode(OF_RECTMODE_CORNER);
+	}
+	
+	if (isScaling && cornerIndex != -1) {
+		float scalePercent = getScaledPercent();
+		scalePercent *= 100;
+		auto corner = corners[cornerIndex];
+		ofSetColor(10, 100);
+		ofDrawLine(mouse, corner);
+		ofSetColor(COLOR_HIGHLIGHT);
+		ofDrawBitmapString(ofToString(scalePercent,1)+"%", mouse);
+
+		string sizeString = ofToString(width,0)+"x"+ofToString(height,0);
+		ofDrawBitmapString(sizeString, x - (sizeString.size()*11)/2, (y - height/2) - 11);
+
 	}
 }

@@ -46,7 +46,10 @@ class ofApp : public ofBaseApp {
 	vector<Asset*> assets;
 	vector<Thumbnail*> thumbnails;
 	Canvas canvas;
-	ofParameter<float> zoom;
+	
+	// thumbnail slider
+	ofRectangle thumbnailBounds;
+	int thumbnailIndex;
 	
 	// the gui
 	bool hideGui;

@@ -8,6 +8,8 @@
 
 #pragma once
 #include "ofMain.h"
+#include "AppGlobals.h"
+
 namespace TileMaker {
 	
 	class Asset {
@@ -26,6 +28,9 @@ namespace TileMaker {
 		}
 		float getRatio() {
 			return ratio;
+		}
+		float getRatioVertical() {
+			return width / height;
 		}
 		float getWidth() {
 			return width;

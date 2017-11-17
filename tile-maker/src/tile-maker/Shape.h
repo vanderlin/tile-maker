@@ -10,9 +10,7 @@
 #include "ofMain.h"
 #include "Asset.h"
 #include "Cursor.h"
-
-#define HANDLE_SIZE 20
-#define DRAW_HANDLE_SIZE 10
+#include "AppGlobals.h"
 
 namespace TileMaker {
 	class Canvas;
@@ -24,14 +22,14 @@ namespace TileMaker {
 		Canvas * canvasRef;
 		Asset * ref;
 		bool isOver, isPressed;
-		bool canRotate;
+		bool canRotate, isScaling;
 		ofPoint prevMouse, mouse;
 		ofPoint downPos, downMouse;
 		ofPoint downRotatePos;
 		ofPoint worldOffset;
 		int cornerIndex;
 		int overCornerIndex;
-		float angle, downAngle;
+		float angle;
 		int orderIndex;
 		ofRectangle downRect;
 		
@@ -54,8 +52,14 @@ namespace TileMaker {
 		float getWidth() {return width;}
 		float getHeight() {return height;}
 		float getRotation() {return angle;}
+		float getScaledPercent() {
+			return (width / ref->getWidth());
+		}
+		
+		
 		void updateCorners();
 		void updateCursor(int index);
+		
 		
 		void setRotation(float a);
 		void setPosition(float _x, float _y);

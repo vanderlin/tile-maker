@@ -1,23 +1,45 @@
 <app>
-	<canvas x="88" y="136"/>
+	<canvas x="422" y="425"/>
 	<shapes>
 		<shape>
-			<filename>crops/export-0.png</filename>
-			<x>471.655</x>
-			<y>340.816</y>
-			<width>110</width>
-			<height>104.787</height>
+			<filename>assets/crops/export-11.png</filename>
+			<x>219.096</x>
+			<y>245.751</y>
+			<width>302</width>
+			<height>323</height>
 			<rotation>0</rotation>
-			<ratio>0.952607</ratio>
-			<org_width>211</org_width>
-			<org_height>201</org_height>
+			<ratio>1.06954</ratio>
+			<org_width>302</org_width>
+			<org_height>323</org_height>
 		</shape>
 		<shape>
-			<filename>crops/_octi.png</filename>
-			<x>190.836</x>
-			<y>278.31</y>
-			<width>230</width>
-			<height>352.34</height>
+			<filename>assets/crops/export-11.png</filename>
+			<x>765.464</x>
+			<y>353.982</y>
+			<width>302</width>
+			<height>323</height>
+			<rotation>0</rotation>
+			<ratio>1.06954</ratio>
+			<org_width>302</org_width>
+			<org_height>323</org_height>
+		</shape>
+		<shape>
+			<filename>assets/crops/export-14.png</filename>
+			<x>289.295</x>
+			<y>928.979</y>
+			<width>228</width>
+			<height>221</height>
+			<rotation>0</rotation>
+			<ratio>0.969298</ratio>
+			<org_width>228</org_width>
+			<org_height>221</org_height>
+		</shape>
+		<shape>
+			<filename>assets/crops/_octi.png</filename>
+			<x>1000.43</x>
+			<y>747.562</y>
+			<width>184</width>
+			<height>281.872</height>
 			<rotation>0</rotation>
 			<ratio>1.53191</ratio>
 			<org_width>1222</org_width>

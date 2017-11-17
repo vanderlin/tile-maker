@@ -8,6 +8,7 @@
 
 #pragma once
 #include "ofMain.h"
+#include "Asset.h"
 #include "Shape.h"
 #include "Cursor.h"
 
@@ -17,9 +18,9 @@ namespace TileMaker {
 	public:
 		bool enablePan;
 		ofPoint downPos;
-		float scale;
+		ofParameter<float> scale;
+		ofRectangle worldRect;
 		float maxZoom, minZoom;
-		vector <ofPoint> temp;
 		vector <Shape*> shapes;
 		int shapeCount;
 		Canvas() {
@@ -37,11 +38,6 @@ namespace TileMaker {
 		}
 		void setSize(int w, int h) {
 			ofRectangle::setSize(w, h);
-			int n = 100;
-			temp.clear();
-			for(int i=0; i<n; i++) {
-				temp.push_back(ofPoint(ofRandom(0, w), ofRandom(0, h)));
-			}
 		}
 		bool isPanning() {
 			return enablePan;
@@ -53,10 +49,13 @@ namespace TileMaker {
 					Cursor::setMode(ofGetMousePressed() ? Cursor::CURSOR_GRAB : Cursor::CURSOR_HAND);
 				}
 			}
-			if (key == 'r') {
+			if (key == OF_KEY_SHIFT) {
 				for(auto shape : shapes) {
 					shape->canRotate = true;
 				}
+			}
+			if (key == 'x') {
+				fitToScreen();
 			}
 			if (key == '`') {
 				for(auto shape : shapes) {
@@ -83,6 +82,7 @@ namespace TileMaker {
 			float my = ((ofGetPreviousMouseY() - y) / scale);
 			return ofPoint(mx, my);
 		}
+		
 		ofPoint toCanvas(ofPoint pt) {
 			return toCanvas(pt.x, pt.y);
 		}
@@ -162,6 +162,18 @@ namespace TileMaker {
 			minZoom = z.getMin(); maxZoom = z.getMax();
 			scale = ofClamp(z, minZoom, maxZoom);
 		}
+		
+		void fitToScreen() {
+			float g = 10;
+			float m = MIN(worldRect.width - g, worldRect.height - g);
+			float s = m / width;
+			float tileSize = width * s;
+			ofLogNotice() << "scale " << s << "\n" << "size " << tileSize << "x" << tileSize;
+			setZoom(s);
+			x = worldRect.x + (worldRect.width-tileSize)/2;
+			y = worldRect.y + (worldRect.height-tileSize)/2;
+		}
+		
 		void begin() {
 			ofPoint pos = getCanvasPosition();
 			ofPushMatrix();
@@ -188,6 +200,7 @@ namespace TileMaker {
 			return ofPoint(cx, cy);
 		}
 		void drawMiniMap() {
+			return;
 			float sr = getRatio();
 			float mapW = 100;
 			float mapH = mapW * sr;
@@ -211,9 +224,10 @@ namespace TileMaker {
 			ofDrawRectangle(0, 0, mapW, mapH);
 			
 			drawAtScale(sx / 3, sy / 3);
-			//ofSetColor(0, 200);
-			//ofFill();
-			//ofDrawRectangle(pos, canvasW, canvasH);
+			
+			ofSetColor(0, 200);
+			ofFill();
+			ofDrawRectangle(pos, canvasW, canvasH);
 			
 			ofPopMatrix();
 		}
@@ -224,35 +238,46 @@ namespace TileMaker {
 			ofPushMatrix();
 			ofTranslate(pos);
 			ofScale(sx, sy);
-			ofNoFill();
-			ofSetColor(255);
-			ofDrawRectangle(0, 0, width, height);
-			for(auto p : temp) {
-				ofDrawCircle(p, 10);
-			}
+
 			ofPopMatrix();
-			
 		}
-		void update() {
+		void update(ofRectangle bounds=ofGetCurrentViewport()) {
+			worldRect = bounds;
 			for(auto shape : shapes) {
 				shape->mouse = getScaledMouse();
 				shape->prevMouse = getPreviousScaledMouse();
 				shape->worldOffset.set(x, y);
 			}
 		}
-		void draw() {
-			ofPoint pos = getCanvasPosition();
-			ofPushMatrix();
-			ofTranslate(pos);
-			ofScale(scale, scale);
-			ofNoFill();
-			ofSetColor(255);
-			ofDrawRectangle(0, 0, width, height);
-			for(auto p : temp) {
-				ofDrawCircle(p, 10);
-			}
-			ofPopMatrix();
+		void drawUI() {
 			
+			ofRectangle uiRect(0, worldRect.y, worldRect.x, worldRect.height-0);
+			ofFill();
+			ofSetColor(COLOR_UI_BACKGROUND);
+			ofDrawRectangle(uiRect);
+			ofSetColor(COLOR_UI_BORDER);
+			ofDrawLine(uiRect.getRight(), uiRect.getTop(), uiRect.getRight(), uiRect.getBottom());
+			
+			float scalePct = scale * 100;
+			ofDrawBitmapStringHighlight("Scale X " + ofToString(scalePct, 1)+"%", 20, ofGetHeight()-15);
+		}
+		void drawBackground() {
+			ofPoint pos = getCanvasPosition();
+			ofFill();
+			ofSetColor(95);
+			ofDrawRectangle(worldRect);
+			
+			ofFill();
+			ofSetColor(195);
+			ofDrawRectangle(pos, width * scale, height * scale);
+			ofNoFill();
+			ofSetColor(10);
+			float pad = 1;
+			ofDrawRectangle(pos.x-pad, pos.y-pad, (width * scale)+pad*2, (height * scale)+pad*2);
+			
+			ofSetColor(120);
+			ofDrawBitmapString(ofToString(width,0)+"x"+ofToString(height,0), pos.x, pos.y + (height * scale) + 15);
+
 		}
 	};
 }

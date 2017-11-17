@@ -10,6 +10,7 @@
 #include "ofMain.h"
 #include "Asset.h"
 
+
 namespace TileMaker {
 	
 	class Thumbnail : public ofRectangle {
