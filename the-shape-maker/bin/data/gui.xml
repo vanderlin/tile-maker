@@ -1,0 +1,16 @@
+<group>
+	<group/>
+	<function_mode>1</function_mode>
+	<texture_width>323</texture_width>
+	<texture_height>146</texture_height>
+	<texture_res>1</texture_res>
+	<invert>0</invert>
+	<layers>10</layers>
+	<depth>22.449</depth>
+	<scale_x>0.408163</scale_x>
+	<scale_y>1.88776</scale_y>
+	<theta>3.62245</theta>
+	<animate>1</animate>
+	<show_layers>1</show_layers>
+<mesh>0</mesh>
+</group>

@@ -1,0 +1,27 @@
+<app>
+	<canvas x="88" y="136"/>
+	<shapes>
+		<shape>
+			<filename>crops/export-0.png</filename>
+			<x>471.655</x>
+			<y>340.816</y>
+			<width>110</width>
+			<height>104.787</height>
+			<rotation>0</rotation>
+			<ratio>0.952607</ratio>
+			<org_width>211</org_width>
+			<org_height>201</org_height>
+		</shape>
+		<shape>
+			<filename>crops/_octi.png</filename>
+			<x>190.836</x>
+			<y>278.31</y>
+			<width>230</width>
+			<height>352.34</height>
+			<rotation>0</rotation>
+			<ratio>1.53191</ratio>
+			<org_width>1222</org_width>
+			<org_height>1872</org_height>
+		</shape>
+	</shapes>
+</app>

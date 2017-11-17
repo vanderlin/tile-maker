@@ -1,0 +1,27 @@
+<group>
+	<group/>
+	<function_mode>4</function_mode>
+	<texture_width>403</texture_width>
+	<texture_height>292</texture_height>
+	<texture_res>1</texture_res>
+	<invert>0</invert>
+	<layers>10</layers>
+	<depth>22.449</depth>
+	<scale_x>0.153061</scale_x>
+	<scale_y>0.102041</scale_y>
+	<theta>0.561224</theta>
+	<animate>1</animate>
+	<show_layers>1</show_layers>
+<mesh>1</mesh>
+<image_maker>
+		<zoom>0.401498</zoom>
+		<threshold>232</threshold>
+		<invert>1</invert>
+		<scale_to_fit>0</scale_to_fit>
+	<scale_poly>0.387755</scale_poly>
+	<blur>26</blur>
+	</image_maker>
+<tile_maker>
+		<zoom>0.728614</zoom>
+	</tile_maker>
+</group>
