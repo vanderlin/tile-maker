@@ -16,3 +16,17 @@
 #define DRAW_HANDLE_SIZE 10
 #define THUMBNAIL_WIDTH 80
 #define MAX_THUMBNAIL_HEIGHT 120
+
+enum {
+	CORNER_TL,
+	CORNER_TR,
+	CORNER_BR,
+	CORNER_BL
+};
+
+class AppSettings {
+public:
+	static ofParameter<bool> drawImages;
+	static ofParameter<float> worldScale;
+};
+

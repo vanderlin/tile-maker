@@ -72,11 +72,12 @@ void Thumbnail::draw() {
 		ofDrawRectangle(0, 0, width, height);
 	}
 	ofSetColor(255);
-	//ref->image.draw(0, 0, width, height);
+	if(AppSettings::drawImages) {
+		ref->image.draw(0, 0, width, height);
+	}
 	ofNoFill();
 	ofDrawRectangle(0, 0, width, height);
 	ofPopMatrix();
-	
 	if(isPressed) {
 		ofSetColor(255, 100);
 		ref->image.draw(dragPos.x, dragPos.y, width, height);

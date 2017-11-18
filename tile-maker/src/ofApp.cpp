@@ -10,7 +10,9 @@ void ofApp::setup() {
 	gui.setDefaultWidth(UI_WIDTH-1);
 	gui.setPosition(1, 130);
 	params.setName("tile maker");
-	params.add(canvas.scale.set("scale", 1, 0.1, 50));
+	params.add(AppSettings::worldScale.set("scale", 1, 0.1, 50));
+	params.add(canvas.editArtboard.set("edit artboard", true));
+	params.add(AppSettings::drawImages.set("draw images", true));
 
 	gui.add(params);
 	
@@ -116,11 +118,19 @@ void ofApp::load() {
 	if(settings.load("settings.xml")) {
 		
 		settings.setTo("canvas");
-		float canvasX = ofToFloat(settings.getAttribute("x"));
-		float canvasY = ofToFloat(settings.getAttribute("y"));
-		canvas.setPosition(canvasX, canvasY);
+		float scale = ofToFloat(settings.getAttribute("scale"));
+		AppSettings::worldScale = scale <= 0 ? 1 : scale;
+		canvas.setPosition(ofToFloat(settings.getAttribute("x")), ofToFloat(settings.getAttribute("y")));
 		
+		settings.setTo("artboard");
+		float ax = settings.getValue<float>("x");
+		float ay = settings.getValue<float>("y");
+		float aw = MAX(settings.getValue<float>("width"), 1);
+		float ah = MAX(settings.getValue<float>("height"), 1);
+		
+		canvas.artboard.set(ax, ay, aw, ah);
 		settings.setToParent();
+
 		if (settings.exists("//shapes")) {
 			settings.setTo("shapes");
 			int nShapes = settings.getNumChildren("shape");
@@ -157,7 +167,15 @@ void ofApp::save() {
 	settings.setTo("canvas");
 	settings.setAttribute("x", ofToString(canvas.x));
 	settings.setAttribute("y", ofToString(canvas.y));
-	settings.setToParent();
+	settings.setAttribute("scale", ofToString(AppSettings::worldScale));
+	
+	ofXml artboardXML;
+	artboardXML.addChild("artboard");
+	artboardXML.addValue("x", canvas.artboard.x);
+	artboardXML.addValue("y", canvas.artboard.y);
+	artboardXML.addValue("width", canvas.artboard.width);
+	artboardXML.addValue("height", canvas.artboard.height);
+	settings.addXml(artboardXML);
 	
 	settings.addChild("shapes");
 	settings.setTo("shapes");
@@ -174,7 +192,6 @@ void ofApp::save() {
 		shapeXML.addValue("height", shape->getHeight());
 		shapeXML.addValue("rotation", shape->getRotation());
 		shapeXML.addValue("ratio", shape->ref->getRatio());
-		
 		
 		shapeXML.addValue("org_width", shape->ref->getWidth());
 		shapeXML.addValue("org_height", shape->ref->getHeight());
@@ -224,9 +241,9 @@ void ofApp::keyReleased(int key){
 void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
 	if(scrollY > 0 || scrollY < 0) {
 		double range = 0.01;
-		float value = canvas.scale + ofMap(scrollY,-1, 1, -range, range);
-		value = ofClamp(value, canvas.scale.getMin(), canvas.scale.getMax());
-		canvas.scale = value;
+		float value = AppSettings::worldScale + ofMap(scrollY,-1, 1, -range, range);
+		value = ofClamp(value, AppSettings::worldScale.getMin(), AppSettings::worldScale.getMax());
+		AppSettings::worldScale = value;
 	}
 }
 

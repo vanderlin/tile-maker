@@ -283,12 +283,10 @@ void Shape::draw() {
 	ofPushMatrix();
 	ofTranslate(pos);
 	ofRotate(angle);
-	ofFill();
-	ofSetColor(isOver?200:255);
-	ofDrawRectangle(-width/2, -height/2, width, height);
-	ofSetColor(20, 100, 255);
-	ofDrawBitmapString(ofToString(orderIndex), 0, 0);
-
+	ofSetColor(255);
+	if (AppSettings::drawImages) {
+		ref->image.draw(-width/2, -height/2, width, height);
+	}
 	ofPopMatrix();
 
 	ofSetColor(0, isOver?255:220);
@@ -298,6 +296,7 @@ void Shape::draw() {
 	auto rects = getCornerRects();
 	int closeIndex = -1;
 	int minDis = 30;
+	
 	for (int i=0; i<4; i++) {
 		ofPoint pnt(round(corners[i].x), round(corners[i].y));
 		ofSetColor(0);

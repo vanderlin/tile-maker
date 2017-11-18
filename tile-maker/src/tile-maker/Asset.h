@@ -9,7 +9,7 @@
 #pragma once
 #include "ofMain.h"
 #include "AppGlobals.h"
-
+#include "Utils.h"
 namespace TileMaker {
 	
 	class Asset {

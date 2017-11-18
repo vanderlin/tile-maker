@@ -47,6 +47,7 @@
 		B6840996567E78436F7ECFAB /* ETF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B047FF96258DC01792B272DB /* ETF.cpp */; };
 		BA3E812A1FBF6FBA001B900A /* Colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BA3E81281FBF6FBA001B900A /* Colors.cpp */; };
 		BA3E812D1FBF7174001B900A /* AppGlobals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BA3E812B1FBF7174001B900A /* AppGlobals.cpp */; };
+		BA3E81301FC085C1001B900A /* Artboard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BA3E812E1FC085C1001B900A /* Artboard.cpp */; };
 		C602002DE761F9B52DB4400A /* ObjectFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AE75A3FBA2C2D87D14F06FE6 /* ObjectFinder.cpp */; };
 		D18CF38D99A82A944A8E743B /* Joint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2AF437082399C8E0BB37A2 /* Joint.cpp */; };
 		D312016F653749193BE87CFF /* ofxSvgGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CE1BF488C57A151E3F57C86 /* ofxSvgGroup.cpp */; };
@@ -294,6 +295,8 @@
 		BA3E81291FBF6FBA001B900A /* Colors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Colors.h; sourceTree = "<group>"; };
 		BA3E812B1FBF7174001B900A /* AppGlobals.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AppGlobals.cpp; path = "tile-maker/AppGlobals.cpp"; sourceTree = "<group>"; };
 		BA3E812C1FBF7174001B900A /* AppGlobals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppGlobals.h; path = "tile-maker/AppGlobals.h"; sourceTree = "<group>"; };
+		BA3E812E1FC085C1001B900A /* Artboard.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Artboard.cpp; path = "tile-maker/Artboard.cpp"; sourceTree = "<group>"; };
+		BA3E812F1FC085C1001B900A /* Artboard.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Artboard.h; path = "tile-maker/Artboard.h"; sourceTree = "<group>"; };
 		BBAF9D981351C596CA67CAF9 /* hybridtracker.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = hybridtracker.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/contrib/hybridtracker.hpp; sourceTree = SOURCE_ROOT; };
 		BF7D87046C4A1A34F8EC0E88 /* Binner.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Binner.h; path = ../../../local_addons/Particles/src/Binner.h; sourceTree = SOURCE_ROOT; };
 		C15AC28AE73FFDF00C18C4C3 /* svgtiny_gradient.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = svgtiny_gradient.cpp; path = ../../../addons/ofxSvgLoader/libs/svgTiny/src/svgtiny_gradient.cpp; sourceTree = SOURCE_ROOT; };
@@ -1150,6 +1153,8 @@
 				FA5F8C0F6878D2EF43F294DE /* Shape.h */,
 				87AF590824CE2214984FDB49 /* Thumbnail.cpp */,
 				382BDB8BABBC11788539579F /* Thumbnail.h */,
+				BA3E812E1FC085C1001B900A /* Artboard.cpp */,
+				BA3E812F1FC085C1001B900A /* Artboard.h */,
 			);
 			name = "tile-maker";
 			sourceTree = "<group>";
@@ -1302,6 +1307,7 @@
 				EBCDE831EFAE08274E799C97 /* Calibration.cpp in Sources */,
 				6AABAB39E82AF5CFEA23A205 /* ContourFinder.cpp in Sources */,
 				45CC483A999BF1065A6B926C /* Distance.cpp in Sources */,
+				BA3E81301FC085C1001B900A /* Artboard.cpp in Sources */,
 				5CC34D433F5806179935B89D /* Flow.cpp in Sources */,
 				2023EF517ED2D8B397511D4B /* Helpers.cpp in Sources */,
 				311DF864378748129984EA1D /* Kalman.cpp in Sources */,

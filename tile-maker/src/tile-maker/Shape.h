@@ -38,13 +38,6 @@ namespace TileMaker {
 		
 		ofPolyline corners;
 		
-		enum {
-			CORNER_TL,
-			CORNER_TR,
-			CORNER_BR,
-			CORNER_BL
-		};
-		
 		Shape(Asset * _ref, float _x=0, float _y=0);
 		ofVec2f getPosition();
 		ofRectangle getRectangle();
