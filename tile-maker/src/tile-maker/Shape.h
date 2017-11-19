@@ -21,6 +21,7 @@ namespace TileMaker {
 	public:
 		Canvas * canvasRef;
 		Asset * ref;
+		bool isSelected;
 		bool isOver, isPressed;
 		bool canRotate, isScaling;
 		ofPoint prevMouse, mouse;
@@ -49,6 +50,7 @@ namespace TileMaker {
 			return (width / ref->getWidth());
 		}
 		
+		ofXml toXML();
 		
 		void updateCorners();
 		void updateCursor(int index);

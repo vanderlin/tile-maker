@@ -38,13 +38,9 @@ class ofApp : public ofBaseApp {
 	void gotMessage(ofMessage msg);
 
 	void load();
-	void save();
 	
 	// on param change
 	void onParamChanged(ofAbstractParameter &value);
-	Asset* getAssetFromFilename(string filename);
-	
-	vector<Asset*> assets;
 	vector<Thumbnail*> thumbnails;
 	Canvas canvas;
 	

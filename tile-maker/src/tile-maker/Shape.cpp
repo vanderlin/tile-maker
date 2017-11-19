@@ -18,6 +18,7 @@ Shape::Shape(Asset * _ref, float _x, float _y) {
 	isPressed = false;
 	canRotate = false;
 	isScaling = false;
+	isSelected = false;
 	x = _x; y = _y;
 	width = ref->getWidth();
 	height = ref->getHeight();
@@ -41,6 +42,25 @@ ofVec2f Shape::getPosition() {
 //--------------------------------------------------------------
 ofRectangle Shape::getRectangle() {
 	return ofRectangle(x - width/2, y - height/2, width, height);
+}
+
+//--------------------------------------------------------------
+ofXml Shape::toXML() {
+	ofXml shapeXML;
+	shapeXML.addChild("shape");
+	shapeXML.setTo("shape");
+	shapeXML.addValue("filename", ref->getFilename());
+	shapeXML.addValue("x", getPosition().x);
+	shapeXML.addValue("y", getPosition().y);
+	shapeXML.addValue("width", getWidth());
+	shapeXML.addValue("height", getHeight());
+	shapeXML.addValue("rotation", getRotation());
+	shapeXML.addValue("ratio", ref->getRatio());
+	
+	shapeXML.addValue("org_width", ref->getWidth());
+	shapeXML.addValue("org_height", ref->getHeight());
+	
+	return shapeXML;
 }
 
 //--------------------------------------------------------------
@@ -290,6 +310,9 @@ void Shape::draw() {
 	ofPopMatrix();
 
 	ofSetColor(0, isOver?255:220);
+	if(isSelected) {
+		ofSetColor(COLOR_SELECTED);
+	}
 	corners.close();
 	corners.draw();
 
@@ -309,7 +332,9 @@ void Shape::draw() {
 		else {
 			ofSetColor(20);
 		}
-		
+		if(isSelected) {
+			ofSetColor(COLOR_SELECTED);
+		}
 		ofSetRectMode(OF_RECTMODE_CENTER);
 		ofDrawRectangle(pnt, 10, 10);
 		ofSetRectMode(OF_RECTMODE_CORNER);

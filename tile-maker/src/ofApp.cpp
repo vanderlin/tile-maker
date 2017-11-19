@@ -21,14 +21,10 @@ void ofApp::setup() {
 	
 	// for now this is hard coded
 	// we can add a open files option
-	ofDirectory dir;
-	dir.listDir("assets/crops");
-	for (int i=0; i<dir.size(); i++) {
-		assets.push_back(new Asset(dir.getPath(i)));
-	}
+	Asset::load("assets/crops");
 	
 	// create thumbnail refs
-	for(auto asset : assets) {
+	for(auto asset : Asset::all()) {
 		thumbnails.push_back(new Thumbnail(asset));
 	}
 	thumbnailBounds.set(0, 0, ofGetWidth(), 130);
@@ -43,16 +39,6 @@ void ofApp::setup() {
 	// load the gui from a file
 	// add and shapes in the canavas
 	load();
-}
-
-//--------------------------------------------------------------
-Asset* ofApp::getAssetFromFilename(string filename) {
-	for(auto asset : assets) {
-		if (asset->getFilename() == filename) {
-			return asset;
-		}
-	}
-	return nullptr;
 }
 
 //--------------------------------------------------------------
@@ -115,93 +101,9 @@ void ofApp::draw() {
 //--------------------------------------------------------------
 void ofApp::load() {
 	gui.loadFromFile("gui.xml");
-	if(settings.load("settings.xml")) {
-		
-		settings.setTo("canvas");
-		float scale = ofToFloat(settings.getAttribute("scale"));
-		AppSettings::worldScale = scale <= 0 ? 1 : scale;
-		canvas.setPosition(ofToFloat(settings.getAttribute("x")), ofToFloat(settings.getAttribute("y")));
-		
-		settings.setTo("artboard");
-		float ax = settings.getValue<float>("x");
-		float ay = settings.getValue<float>("y");
-		float aw = MAX(settings.getValue<float>("width"), 1);
-		float ah = MAX(settings.getValue<float>("height"), 1);
-		
-		canvas.artboard.set(ax, ay, aw, ah);
-		settings.setToParent();
-
-		if (settings.exists("//shapes")) {
-			settings.setTo("shapes");
-			int nShapes = settings.getNumChildren("shape");
-			if (nShapes) {
-				settings.setTo("shape[0]");
-				for(int i=0; i<nShapes; i++) {
-					
-					Asset * asset = getAssetFromFilename(settings.getValue<string>("filename"));
-					if (asset) {
-						ofLogNotice() << "shapes " << asset;
-						Shape * shape = canvas.addShape(new Shape(asset, 0, 0));
-						shape->setPosition(settings.getValue<float>("x"), settings.getValue<float>("y"));
-						shape->setSize(settings.getValue<float>("width"), settings.getValue<float>("height"));
-						shape->setRotation(settings.getValue<float>("rotation"));
-
-					}
-					settings.setToSibling();
-				}
-			}
-		}
-		settings.setToParent();
-		ofLogNotice() << "settings loaded";
-	}
+	canvas.load();
 }
 
-//--------------------------------------------------------------
-void ofApp::save() {
-	
-	gui.saveToFile("gui.xml");
-	
-	settings.clear();
-	settings.addChild("app");
-	settings.addChild("canvas");
-	settings.setTo("canvas");
-	settings.setAttribute("x", ofToString(canvas.x));
-	settings.setAttribute("y", ofToString(canvas.y));
-	settings.setAttribute("scale", ofToString(AppSettings::worldScale));
-	
-	ofXml artboardXML;
-	artboardXML.addChild("artboard");
-	artboardXML.addValue("x", canvas.artboard.x);
-	artboardXML.addValue("y", canvas.artboard.y);
-	artboardXML.addValue("width", canvas.artboard.width);
-	artboardXML.addValue("height", canvas.artboard.height);
-	settings.addXml(artboardXML);
-	
-	settings.addChild("shapes");
-	settings.setTo("shapes");
-	
-	for (auto shape : canvas.shapes) {
-		
-		ofXml shapeXML;
-		shapeXML.addChild("shape");
-		shapeXML.setTo("shape");
-		shapeXML.addValue("filename", shape->ref->getFilename());
-		shapeXML.addValue("x", shape->getPosition().x);
-		shapeXML.addValue("y", shape->getPosition().y);
-		shapeXML.addValue("width", shape->getWidth());
-		shapeXML.addValue("height", shape->getHeight());
-		shapeXML.addValue("rotation", shape->getRotation());
-		shapeXML.addValue("ratio", shape->ref->getRatio());
-		
-		shapeXML.addValue("org_width", shape->ref->getWidth());
-		shapeXML.addValue("org_height", shape->ref->getHeight());
-		
-		settings.addXml(shapeXML);
-	}
-	
-	settings.setToParent();
-	settings.save("settings.xml");
-}
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
@@ -222,8 +124,8 @@ void ofApp::keyPressed(int key){
 		if (key == 't') {
 			hideGui = !hideGui;
 		}
-		if (key == 's') {
-			save();
+		if (canvas.commandIsPressed && key == 's') {
+			gui.saveToFile("gui.xml");
 		}
 		if (key == 'z') {
 			canvas.setZoom(1);

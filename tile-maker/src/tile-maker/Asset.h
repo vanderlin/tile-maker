@@ -18,6 +18,13 @@ namespace TileMaker {
 		string filename;
 	public:
 		
+		static vector <Asset*> items;
+		static Asset * at(int i);
+		static vector <Asset*> all();
+		static int size();
+		static Asset* getWithFilename(string filename);
+		static bool load(string dirName);
+
 		ofImage image;
 		Asset(string _filename) {
 			filename = _filename;

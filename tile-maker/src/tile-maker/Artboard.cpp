@@ -152,10 +152,13 @@ void Artboard::draw() {
 	getShape().draw();
 	auto cornerRects = getCornerRects();
 	corners.draw();
-	for (int i=0; i<4; i++) {
-		ofFill();
-		ofSetColor(overCornerIndex == i ? 0 : 10);
-		ofDrawRectangle(cornerRects[i]);
+	
+	if(editable) {
+		for (int i=0; i<4; i++) {
+			ofFill();
+			ofSetColor(overCornerIndex == i ? 0 : 10);
+			ofDrawRectangle(cornerRects[i]);
+		}
 	}
 	
 	ofNoFill();
