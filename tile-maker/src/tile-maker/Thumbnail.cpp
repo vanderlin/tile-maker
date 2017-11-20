@@ -90,7 +90,7 @@ void Thumbnail::draw() {
 		else {
 			ofFill();
 			ofDrawRectangle(dragPos.x, dragPos.y, width, height);
-		}		
+		}
 	}
 }
 

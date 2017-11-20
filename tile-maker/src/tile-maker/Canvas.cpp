@@ -269,7 +269,7 @@ void Canvas::mouseDragged(int _x, int _y, int button) {
 	
 	bool insideArtboard = artboard.inside(mouse.x, mouse.y);
 	
-	if(pressedShapeInSelection) {
+	if(!enablePan && pressedShapeInSelection) {
 		for(auto shape : selectionGroup) {
 			shape->move(diffMouse.x, diffMouse.y);
 		}
@@ -323,8 +323,11 @@ void Canvas::mousePressed(int _x, int _y, int button) {
 		return;
 	}
 	
-	// we did not click inside the selection group clear it
-	selectionGroup.clear();
+	// we did not click the selection group clear it only
+	// if we are not panning - then we want the selection still
+	if (!enablePan) {
+		selectionGroup.clear();
+	}
 	
 	// edit the artboard
 	if(editArtboard) {
