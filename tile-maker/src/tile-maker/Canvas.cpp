@@ -7,6 +7,8 @@
 //
 
 #include "Canvas.h"
+#include "ofApp.h"
+
 using namespace TileMaker;
 
 //--------------------------------------------------------------
@@ -35,7 +37,6 @@ Shape * Canvas::addShape(Shape * shape) {
 
 //--------------------------------------------------------------
 void Canvas::setSize(int w, int h) {
-	ofRectangle::setSize(w, h);
 	artboard.setSize(w, h);
 }
 
@@ -44,22 +45,32 @@ bool Canvas::isPanning() {
 	return enablePan;
 }
 
-#pragma mark - canvas helpers
+#pragma mark - static canvas mouse positions
 //--------------------------------------------------------------
 ofPoint Canvas::getScaledMouse() {
 	float scale = AppSettings::worldScale;
-	float mx = ((ofGetMouseX() - x) / scale);
-	float my = ((ofGetMouseY() - y) / scale);
+	ofApp * app = (ofApp*)ofGetAppPtr();
+	float mx = ((ofGetMouseX() - app->canvas.x) / scale);
+	float my = ((ofGetMouseY() - app->canvas.y) / scale);
 	return ofPoint(mx, my);
 }
 
 //--------------------------------------------------------------
 ofPoint Canvas::getPreviousScaledMouse() {
 	float scale = AppSettings::worldScale;
-	float mx = ((ofGetPreviousMouseX() - x) / scale);
-	float my = ((ofGetPreviousMouseY() - y) / scale);
+	ofApp * app = (ofApp*)ofGetAppPtr();
+	float mx = ((ofGetPreviousMouseX() - app->canvas.x) / scale);
+	float my = ((ofGetPreviousMouseY() - app->canvas.y) / scale);
 	return ofPoint(mx, my);
 }
+//--------------------------------------------------------------
+ofPoint Canvas::getDiffScaledMouse() {
+	ofPoint a = Canvas::getScaledMouse();
+	ofPoint b = Canvas::getPreviousScaledMouse();
+	ofPoint c = b - a;
+	return c;
+}
+#pragma mark - canvas helpers
 
 //--------------------------------------------------------------
 ofPoint Canvas::toCanvas(ofPoint pt) {
@@ -123,12 +134,15 @@ void Canvas::keyPressed(int key) {
 		}
 	}
 		
-	
-	if(key == OF_KEY_RETURN) {
-		if(editArtboard) {
+	if (editArtboard) {
+		if(key == OF_KEY_RETURN) {
 			editArtboard = false;
 		}
+		if(key == 'z') {
+			artboard.setPosition(0, 0);
+		}
 	}
+	
 	if (key == ' ') {
 		enablePan = true;
 		Cursor::setMode(ofGetMousePressed() ? Cursor::CURSOR_GRAB : Cursor::CURSOR_HAND);
@@ -156,6 +170,9 @@ void Canvas::keyPressed(int key) {
 	}
 	if (commandIsPressed && key == 'a') {
 		editArtboard = !editArtboard;
+	}
+	if (commandIsPressed && key == 'z') {
+		setZoom(1);
 	}
 }
 
@@ -223,8 +240,7 @@ void Canvas::mouseDragged(int _x, int _y, int button) {
 	}
 	
 	else if(enablePan) {
-		x += (diffMouse.x) * scale;
-		y += (diffMouse.y) * scale;
+		move(diffMouse.x * scale, diffMouse.y * scale);
 	}
 	
 	else {
@@ -247,7 +263,8 @@ void Canvas::mouseDragged(int _x, int _y, int button) {
 //--------------------------------------------------------------
 void Canvas::mousePressed(int _x, int _y, int button) {
 	ofPoint mouse = getScaledMouse();
-	
+	float scale = AppSettings::worldScale;
+
 	// are we in a selection group
 	if(selectionGroup.size() > 0) {
 		pressedShapeInSelection = false;
@@ -272,7 +289,8 @@ void Canvas::mousePressed(int _x, int _y, int button) {
 	
 	// panning the artboard
 	else if(enablePan) {
-		downPos = ofPoint(_x, _y) - getPosition();
+		
+		return;
 	}
 	
 	// just a press
@@ -337,6 +355,11 @@ void Canvas::setZoom(ofParameter<float> z) {
 	AppSettings::worldScale = ofClamp(z, minZoom, maxZoom);
 }
 
+//--------------------------------------------------------------
+void Canvas::move(float _x, float _y) {
+	x += _x;
+	y += _y;
+}
 //--------------------------------------------------------------
 void Canvas::fitToScreen() {
 	float g = 10;
@@ -405,6 +428,8 @@ void Canvas::save(string filename) {
 	
 	ofLogNotice() << filename << " saved";
 }
+
+//--------------------------------------------------------------
 void Canvas::load(string filename) {
 	ofXml xml;
 	if(xml.load(filename)) {
@@ -412,7 +437,8 @@ void Canvas::load(string filename) {
 		xml.setTo("canvas");
 		float scale = ofToFloat(xml.getAttribute("scale"));
 		AppSettings::worldScale = scale <= 0 ? 1 : scale;
-		setPosition(ofToFloat(xml.getAttribute("x")), ofToFloat(xml.getAttribute("y")));
+		x = ofToFloat(xml.getAttribute("x"));
+		y = ofToFloat(xml.getAttribute("y"));
 		
 		xml.setTo("artboard");
 		float ax = xml.getValue<float>("x");
@@ -454,12 +480,6 @@ void Canvas::exportSVG() {
 		shape->drawRaw();
 	}
 	ofEndSaveScreenAsSVG();
-}
-
-//--------------------------------------------------------------
-ofRectangle Canvas::getScaledRect() {
-	float scale = AppSettings::worldScale;
-	return ofRectangle(x, y, width * scale, height * scale);
 }
 
 #pragma mark - drawing
@@ -530,7 +550,7 @@ void Canvas::drawUI() {
 	ofDrawLine(uiRect.getRight(), uiRect.getTop(), uiRect.getRight(), uiRect.getBottom());
 	
 	float scalePct = scale * 100;
-	ofDrawBitmapStringHighlight("Scale X " + ofToString(scalePct, 1)+"%", 20, ofGetHeight()-15);
+	ofDrawBitmapStringHighlight("Scale X " + ofToString(scalePct, 1)+"%\nx "+ofToString(x)+" y"+ofToString(y), 20, ofGetHeight()-25);
 }
 
 //--------------------------------------------------------------
@@ -538,6 +558,9 @@ void Canvas::drawBackground() {
 	
 	ofFill();
 	ofSetColor(95);
+	ofDrawRectangle(worldRect);
+	ofNoFill();
+	ofSetColor(10);
 	ofDrawRectangle(worldRect);
 	/*
 	 ofSetColor(195);

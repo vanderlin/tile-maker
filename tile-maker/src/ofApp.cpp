@@ -71,6 +71,15 @@ void ofApp::draw() {
 	for(auto shape : canvas.shapes) {
 		shape->draw();
 	}
+	
+	float scale = AppSettings::worldScale;
+	ofPoint mouse = Canvas::getScaledMouse();
+
+	ofPoint pos = Canvas::getScaledMouse();
+	pos.y -= 100;
+	ofDrawBitmapString(ofToString(mouse.x)+"\n"+ofToString(mouse.y), pos);
+	
+	
 	canvas.end();
 	
 	canvas.drawUI();
@@ -102,6 +111,20 @@ void ofApp::draw() {
 void ofApp::load() {
 	gui.loadFromFile("gui.xml");
 	canvas.load();
+	ofXml settings;
+	if(settings.load("settings.xml")) {
+		settings.setTo("app");
+		ofSetWindowShape(getValueFromXml(settings, "window_width", DEFAULT_WINDOW_WIDTH), getValueFromXml(settings, "window_height", DEFAULT_WINDOW_HEIGHT));
+	}
+}
+void ofApp::save() {
+	gui.saveToFile("gui.xml");
+	ofXml settings;
+	settings.addChild("app");
+	settings.setTo("app");
+	settings.addValue("window_width", (int)ofGetWindowWidth());
+	settings.addValue("window_height", (int)ofGetWindowHeight());
+	settings.save("settings.xml");
 }
 
 
@@ -125,11 +148,10 @@ void ofApp::keyPressed(int key){
 			hideGui = !hideGui;
 		}
 		if (canvas.commandIsPressed && key == 's') {
-			gui.saveToFile("gui.xml");
+			save();
 		}
-		if (key == 'z') {
-			canvas.setZoom(1);
-		}
+		
+		
 	}
 }
 
@@ -140,12 +162,15 @@ void ofApp::keyReleased(int key){
 }
 
 //--------------------------------------------------------------
+ofPoint prevPt;
 void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
 	if(scrollY > 0 || scrollY < 0) {
 		double range = 0.01;
 		float value = AppSettings::worldScale + ofMap(scrollY,-1, 1, -range, range);
 		value = ofClamp(value, AppSettings::worldScale.getMin(), AppSettings::worldScale.getMax());
+		
 		AppSettings::worldScale = value;
+
 	}
 }
 

@@ -100,6 +100,10 @@ bool Artboard::inside(float _x, float _y) {
 	return corners.inside(_x, _y);
 }
 
+void Artboard::setPosition(float _x, float _y) {
+	set(_x, _y, width, height);
+}
+
 void Artboard::set(float _x, float _y, float _width, float _height) {
 	x = _x; y = _y;
 	width = _width; height = _height;

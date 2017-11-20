@@ -17,12 +17,12 @@ namespace TileMaker {
 	
 	class Shape;	
 	
-	class Canvas : public ofRectangle {
+	class Canvas {
 
 	public:
 		
 		ofParameter<bool> editArtboard;
-		
+		float x, y;
 		bool commandIsPressed;
 		bool shiftIsPressed;
 		bool pressedShapeInSelection;
@@ -35,7 +35,6 @@ namespace TileMaker {
 		bool pressedInsideArtboard;
 
 		bool enablePan;
-		ofPoint downPos;
 		ofRectangle worldRect;
 		float maxZoom, minZoom;
 		vector <Shape*> shapes;
@@ -49,8 +48,9 @@ namespace TileMaker {
 		void keyPressed(int key);
 		void keyReleased(int key);
 		
-		ofPoint getScaledMouse();
-		ofPoint getPreviousScaledMouse();
+		static ofPoint getScaledMouse();
+		static ofPoint getPreviousScaledMouse();
+		static ofPoint getDiffScaledMouse();
 		
 		ofPoint toCanvas(ofPoint pt);
 		ofPoint toCanvas(float _x, float _y);
@@ -66,7 +66,7 @@ namespace TileMaker {
 		// set the zoom / scale of the canvas
 		void setZoom(float z);
 		void setZoom(ofParameter<float> z);
-		
+		void move(float _x, float _y);
 		void fitToScreen();
 		
 		// push and pop canvas
@@ -74,7 +74,6 @@ namespace TileMaker {
 		void end();
 		
 		void exportSVG();
-		ofRectangle getScaledRect();
 		void drawMiniMap();
 		void drawAtScale(float sx, float sy);
 		void update(ofRectangle bounds=ofGetCurrentViewport());

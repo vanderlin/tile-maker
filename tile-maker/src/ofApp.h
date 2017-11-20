@@ -38,6 +38,7 @@ class ofApp : public ofBaseApp {
 	void gotMessage(ofMessage msg);
 
 	void load();
+	void save();
 	
 	// on param change
 	void onParamChanged(ofAbstractParameter &value);
@@ -50,7 +51,6 @@ class ofApp : public ofBaseApp {
 	
 	// the gui
 	bool hideGui;
-	ofXml settings;
 	ofParameterGroup params;
 	ofxPanel gui;
 	

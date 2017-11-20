@@ -32,6 +32,7 @@ namespace TileMaker {
 		void mouseReleased(int _x, int _y, int button);
 		
 		void set(float _x, float _y, float _width, float _height);
+		void setPosition(float _x, float _y);
 		void setSize(float _width, float _height);
 		
 		bool inside(float _x, float _y);
