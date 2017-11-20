@@ -16,10 +16,28 @@
 namespace TileMaker {
 	
 	class Shape;	
+
+	class History {
+	public:
+		vector <Shape> shapes;
+		void setShapes(vector <Shape> & _shapes) {
+			for(auto shape : _shapes) {
+				shapes.push_back(shape);
+			}
+		}
+		void clear() {
+			shapes.clear();
+		}
+	};
 	
 	class Canvas {
 
 	public:
+		
+		int historyIndex;
+		vector <History> history;
+		void saveState();
+		void setSate(int index);
 		
 		ofParameter<bool> editArtboard;
 		float x, y;
@@ -27,6 +45,8 @@ namespace TileMaker {
 		bool shiftIsPressed;
 		bool pressedShapeInSelection;
 		bool pressedInsideShapes;
+		bool selectionEnabled;
+		
 		ofRectangle selectionRect;
 		vector<Shape*> selectionGroup;
 		Shape * selectedShape;
@@ -37,11 +57,11 @@ namespace TileMaker {
 		bool enablePan;
 		ofRectangle worldRect;
 		float maxZoom, minZoom;
-		vector <Shape*> shapes;
+		vector <Shape> shapes;
 		int shapeCount;
 		
 		Canvas();
-		Shape * addShape(Shape * shape);
+		Shape * addShape(Asset * ref, float x, float y);
 		void setSize(int w, int h);
 		bool isPanning();
 		

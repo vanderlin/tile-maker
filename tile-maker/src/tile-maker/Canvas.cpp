@@ -13,6 +13,7 @@ using namespace TileMaker;
 
 //--------------------------------------------------------------
 Canvas::Canvas() {
+	historyIndex = -1;
 	selectedShape = nullptr;
 	pressedShapeInSelection = false;
 	pressedInsideShapes = false;
@@ -21,18 +22,21 @@ Canvas::Canvas() {
 	shapeCount = 0;
 	enablePan = false;
 	commandIsPressed = false;
+	selectionEnabled = true;
 	AppSettings::worldScale = 1;
 	minZoom = 0.2; maxZoom = 50;
 }
 
 #pragma mark - adding shapes
 //--------------------------------------------------------------
-Shape * Canvas::addShape(Shape * shape) {
+Shape * Canvas::addShape(Asset * ref, float x, float y) {
+	shapes.push_back(Shape(ref, x, y));
+	Shape * shape = &shapes.back();
 	shape->canvasRef = this;
 	shape->orderIndex = shapeCount;
-	shapes.push_back(shape);
+	
 	shapeCount ++;
-	return shapes.back();
+	return &shapes.back();
 }
 
 //--------------------------------------------------------------
@@ -83,6 +87,29 @@ ofPoint Canvas::toCanvas(float _x, float _y) {
 	return ofPoint(mx, my);
 }
 
+#pragma mark - History
+//--------------------------------------------------------------
+void Canvas::saveState() {
+	
+	if (history.size() > MAX_HISTORY) {
+		history.erase(history.begin());
+	}
+	History state;
+	state.setShapes(shapes);
+	
+	history.push_back(state);
+	historyIndex = history.size()-1;
+}
+
+//--------------------------------------------------------------
+void Canvas::setSate(int index) {
+	History state = history[index];
+	shapes.clear();
+	for (auto shape : state.shapes) {
+		shapes.push_back(shape);
+	}
+}
+
 #pragma mark - key input events
 //--------------------------------------------------------------
 void Canvas::keyPressed(int key) {
@@ -113,22 +140,22 @@ void Canvas::keyPressed(int key) {
 	if (selectionGroup.size()) {
 		float amt = shiftIsPressed ? 10 : 1;
 		if(key == OF_KEY_UP) {
-			for(auto shape : selectionGroup) {
+			for(auto& shape : selectionGroup) {
 				shape->move(0, -amt);
 			}
 		}
 		if(key == OF_KEY_DOWN) {
-			for(auto shape : selectionGroup) {
+			for(auto& shape : selectionGroup) {
 				shape->move(0, amt);
 			}
 		}
 		if(key == OF_KEY_RIGHT) {
-			for(auto shape : selectionGroup) {
+			for(auto& shape : selectionGroup) {
 				shape->move(amt, 0);
 			}
 		}
 		if(key == OF_KEY_LEFT) {
-			for(auto shape : selectionGroup) {
+			for(auto& shape : selectionGroup) {
 				shape->move(-amt, 0);
 			}
 		}
@@ -149,14 +176,14 @@ void Canvas::keyPressed(int key) {
 	}
 	
 	if (key == OF_KEY_SHIFT) {
-		for(auto shape : shapes) {
-			shape->canRotate = true;
+		for(auto& shape : shapes) {
+			shape.canRotate = true;
 		}
 	}
 	
 	if (key == '`') {
-		for(auto shape : shapes) {
-			shape->setRotation(0);
+		for(auto& shape : shapes) {
+			shape.setRotation(0);
 		}
 	}
 	if (commandIsPressed && key == 's') {
@@ -171,9 +198,22 @@ void Canvas::keyPressed(int key) {
 	if (commandIsPressed && key == 'a') {
 		editArtboard = !editArtboard;
 	}
-	if (commandIsPressed && key == 'z') {
+	if (commandIsPressed && key == '1') {
 		setZoom(1);
 	}
+	if (!shiftIsPressed && commandIsPressed && key == 'z') {
+		if(historyIndex > 0) {
+			historyIndex --;
+		}
+		setSate(historyIndex);
+	}
+	if (shiftIsPressed && commandIsPressed && key == 'z') {
+		if(historyIndex < history.size()-1) {
+			historyIndex ++;
+		}
+		setSate(historyIndex);
+	}
+	ofLogNotice() << historyIndex;
 }
 
 //--------------------------------------------------------------
@@ -186,7 +226,7 @@ void Canvas::keyReleased(int key) {
 		shiftIsPressed = false;
 	}
 	for(auto shape : shapes) {
-		shape->canRotate = false;
+		shape.canRotate = false;
 	}
 }
 
@@ -194,6 +234,7 @@ void Canvas::keyReleased(int key) {
 //--------------------------------------------------------------
 void Canvas::mouseMoved(int _x, int _y ) {
 	ofPoint mouse = getScaledMouse();
+	
 	
 	if(editArtboard) {
 		artboard.mouseMoved(mouse.x, mouse.y);
@@ -203,15 +244,15 @@ void Canvas::mouseMoved(int _x, int _y ) {
 	}
 	else {
 		bool isInsideShape = false;
-		for(auto shape : shapes) {
-			shape->mouse = getScaledMouse();
-			shape->prevMouse = getPreviousScaledMouse();
-			shape->isOver = false;
+		for(auto& shape : shapes) {
+			shape.mouse = getScaledMouse();
+			shape.prevMouse = getPreviousScaledMouse();
+			shape.isOver = false;
 		}
 		
 		for(int i=shapes.size()-1; i>=0; i--) {
-			Shape * shape = shapes[i];
-			if(shape->mouseMoved(mouse.x, mouse.y)) {
+			Shape& shape = shapes[i];
+			if(shape.mouseMoved(mouse.x, mouse.y)) {
 				break;
 			}
 		}
@@ -245,16 +286,16 @@ void Canvas::mouseDragged(int _x, int _y, int button) {
 	
 	else {
 		
-		if (selectionGroup.size() == 0 && !pressedInsideShapes) {
+		if (selectionGroup.size() == 0 && !pressedInsideShapes && selectionEnabled) {
 			selectionRect.width += diffMouse.x;
 			selectionRect.height += diffMouse.y;
 		}
 		else {
-			for(auto shape : shapes) {
-				shape->mouse = getScaledMouse();
-				shape->prevMouse = getPreviousScaledMouse();
-				shape->worldOffset.set(x, y);
-				shape->mouseDragged(mouse.x, mouse.y, button);
+			for(auto& shape : shapes) {
+				shape.mouse = getScaledMouse();
+				shape.prevMouse = getPreviousScaledMouse();
+				shape.worldOffset.set(x, y);
+				shape.mouseDragged(mouse.x, mouse.y, button);
 			}
 		}
 	}
@@ -264,7 +305,10 @@ void Canvas::mouseDragged(int _x, int _y, int button) {
 void Canvas::mousePressed(int _x, int _y, int button) {
 	ofPoint mouse = getScaledMouse();
 	float scale = AppSettings::worldScale;
-
+	
+	// first just clear out the temp cache
+	saveState();
+	
 	// are we in a selection group
 	if(selectionGroup.size() > 0) {
 		pressedShapeInSelection = false;
@@ -296,24 +340,24 @@ void Canvas::mousePressed(int _x, int _y, int button) {
 	// just a press
 	else {
 		
-		for(auto shape : shapes) {
-			shape->isSelected = false;
-			shape->isPressed = false;
-			shape->mouse = getScaledMouse();
-			shape->prevMouse = getPreviousScaledMouse();
+		for(auto& shape : shapes) {
+			shape.isSelected = false;
+			shape.isPressed = false;
+			shape.mouse = getScaledMouse();
+			shape.prevMouse = getPreviousScaledMouse();
 		}
 		
 		pressedInsideShapes = false;
 		for(int i=shapes.size()-1; i>=0; i--) {
-			Shape * shape = shapes[i];
-			if(shape->mousePressed(mouse.x, mouse.y, button)) {
+			Shape& shape = shapes[i];
+			if(shape.mousePressed(mouse.x, mouse.y, button)) {
 				pressedInsideShapes = true;
-				shape->isSelected = true;
-				selectedShape = shape;
+				shape.isSelected = true;
+				selectedShape = &shape;
 				break;
 			}
 		}
-		if (!pressedInsideShapes) {
+		if (!pressedInsideShapes && selectionEnabled) {
 			selectionRect.setPosition(mouse);
 			selectedShape = NULL;
 		}
@@ -324,10 +368,10 @@ void Canvas::mousePressed(int _x, int _y, int button) {
 void Canvas::mouseReleased(int _x, int _y, int button) {
 	
 	if(selectionRect.getArea() > 0) {
-		for(auto shape : shapes) {
-			if(selectionRect.intersects(shape->getRectangle())) {
-				shape->isSelected = true;
-				selectionGroup.push_back(shape);
+		for(auto& shape : shapes) {
+			if(selectionRect.intersects(shape.getRectangle())) {
+				shape.isSelected = true;
+				selectionGroup.push_back(&shape);
 			}
 		}
 	}
@@ -335,10 +379,10 @@ void Canvas::mouseReleased(int _x, int _y, int button) {
 	pressedInsideShapes = false;
 	ofPoint mouse = getScaledMouse();
 	artboard.mouseReleased(mouse.x, mouse.y, button);
-	for(auto shape : shapes) {
-		shape->mouse = getScaledMouse();
-		shape->prevMouse = getPreviousScaledMouse();
-		shape->mouseReleased(_x, _y, button);
+	for(auto& shape : shapes) {
+		shape.mouse = getScaledMouse();
+		shape.prevMouse = getPreviousScaledMouse();
+		shape.mouseReleased(_x, _y, button);
 	}
 	
 	selectionRect.set(0, 0, 0, 0);
@@ -419,8 +463,8 @@ void Canvas::save(string filename) {
 	xml.addChild("shapes");
 	xml.setTo("shapes");
 	
-	for (auto shape : shapes) {
-		ofXml shapeXML = shape->toXML();
+	for (auto& shape : shapes) {
+		ofXml shapeXML = shape.toXML();
 		xml.addXml(shapeXML);
 	}
 	
@@ -457,7 +501,7 @@ void Canvas::load(string filename) {
 				for(int i=0; i<nShapes; i++) {
 					Asset * asset = Asset::getWithFilename(xml.getValue<string>("filename"));
 					if (asset) {
-						Shape * shape = addShape(new Shape(asset, 0, 0));
+						Shape * shape = addShape(asset, 0, 0);
 						ofLogNotice() << "shapes " << asset;
 						shape->setPosition(xml.getValue<float>("x"), xml.getValue<float>("y"));
 						shape->setSize(xml.getValue<float>("width"), xml.getValue<float>("height"));
@@ -476,8 +520,8 @@ void Canvas::load(string filename) {
 //--------------------------------------------------------------
 void Canvas::exportSVG() {
 	ofBeginSaveScreenAsSVG("test.svg");
-	for(auto shape : shapes) {
-		shape->drawRaw();
+	for(auto& shape : shapes) {
+		shape.drawRaw();
 	}
 	ofEndSaveScreenAsSVG();
 }
@@ -532,10 +576,10 @@ void Canvas::drawAtScale(float sx, float sy) {
 //--------------------------------------------------------------
 void Canvas::update(ofRectangle bounds) {
 	worldRect = bounds;
-	for(auto shape : shapes) {
-		shape->mouse = getScaledMouse();
-		shape->prevMouse = getPreviousScaledMouse();
-		shape->worldOffset.set(x, y);
+	for(auto& shape : shapes) {
+		shape.mouse = getScaledMouse();
+		shape.prevMouse = getPreviousScaledMouse();
+		shape.worldOffset.set(x, y);
 	}
 }
 
@@ -549,8 +593,27 @@ void Canvas::drawUI() {
 	ofSetColor(COLOR_UI_BORDER);
 	ofDrawLine(uiRect.getRight(), uiRect.getTop(), uiRect.getRight(), uiRect.getBottom());
 	
+	bool drawHistory = false;
+	if (drawHistory) {
+		for(int i=0; i<history.size(); i++) {
+			if (i==historyIndex) {
+				ofSetColor(255, 255, 0);
+			}
+			else {
+				ofSetColor(10);
+			}
+			ofFill();
+			
+			ofPushMatrix();
+			ofTranslate(worldRect.x + 10, worldRect.y + 10 + (i * 22));
+			ofDrawRectangle(0, 0, 100, 20);
+			ofSetColor(255);
+			ofDrawBitmapStringHighlight(ofToString(history[i].shapes.size()), 10, 14);
+			ofPopMatrix();
+		}
+	}
 	float scalePct = scale * 100;
-	ofDrawBitmapStringHighlight("Scale X " + ofToString(scalePct, 1)+"%\nx "+ofToString(x)+" y"+ofToString(y), 20, ofGetHeight()-25);
+	ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate(),0)+"fps\nScale X " + ofToString(scalePct, 1)+"%\nx "+ofToString(x)+" y"+ofToString(y), 20, ofGetHeight()-35);
 }
 
 //--------------------------------------------------------------
@@ -572,10 +635,12 @@ void Canvas::drawBackground() {
 	 ofFill();
 	 ofDrawRectangle(x, y, width * scale, height * scale);
 	 */
+	
 	begin();
 	artboard.editable = editArtboard;
 	artboard.draw();
 	end();
+	
 	
 }
 

@@ -18,9 +18,11 @@ namespace TileMaker {
 	// --------------------------------
 	class Shape {
 	private:
+		
 	public:
 		Canvas * canvasRef;
 		Asset * ref;
+		
 		bool isSelected;
 		bool isOver, isPressed;
 		bool canRotate, isScaling;
@@ -39,7 +41,10 @@ namespace TileMaker {
 		
 		ofPolyline corners;
 		
-		Shape(Asset * _ref, float _x=0, float _y=0);
+		Shape(Asset * _ref, float _x=0, float _y=0, float _angle=0);
+		Shape(Shape * mom);
+		void init();
+		
 		ofVec2f getPosition();
 		ofRectangle getRectangle();
 		float getAngleFromPoints(ofVec2f a, ofVec2f b);

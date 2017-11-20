@@ -11,20 +11,35 @@
 
 using namespace TileMaker;
 
-Shape::Shape(Asset * _ref, float _x, float _y) {
+Shape::Shape(Asset * _ref, float _x, float _y, float _angle) {
 	canvasRef = NULL;
 	ref = _ref;
+	x = _x; y = _y;
+	angle = _angle;
+	width = ref->getWidth();
+	height = ref->getHeight();
+	init();
+}
+Shape::Shape(Shape * mom) {
+	x = mom->x;
+	y = mom->y;
+	ref = mom->ref;
+	angle = mom->angle;
+	width = mom->width;
+	height = mom->height;
+	canvasRef = mom->canvasRef;
+	init();
+}
+
+void Shape::init() {
 	isOver = false;
 	isPressed = false;
 	canRotate = false;
 	isScaling = false;
 	isSelected = false;
-	x = _x; y = _y;
-	width = ref->getWidth();
-	height = ref->getHeight();
 	cornerIndex = -1;
 	overCornerIndex = -1;
-	angle = 0;
+	
 	ofRectangle rect = getRectangle();
 	
 	corners.resize(4);
@@ -32,8 +47,8 @@ Shape::Shape(Asset * _ref, float _x, float _y) {
 	corners[CORNER_TR] = rect.getTopRight();
 	corners[CORNER_BR] = rect.getBottomRight();
 	corners[CORNER_BL] = rect.getBottomLeft();
+	updateCorners();
 }
-
 //--------------------------------------------------------------
 ofVec2f Shape::getPosition() {
 	return getRectangle().getCenter();
@@ -304,7 +319,7 @@ void Shape::draw() {
 	ofTranslate(pos);
 	ofRotate(angle);
 	ofSetColor(255);
-	if (AppSettings::drawImages) {
+	if (AppSettings::drawImages && ref) {
 		ref->image.draw(-width/2, -height/2, width, height);
 	}
 	ofPopMatrix();

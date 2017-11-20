@@ -68,8 +68,8 @@ void ofApp::draw() {
 	canvas.drawBackground();
 	
 	canvas.begin();
-	for(auto shape : canvas.shapes) {
-		shape->draw();
+	for(auto& shape : canvas.shapes) {
+		shape.draw();
 	}
 	
 	float scale = AppSettings::worldScale;
@@ -197,7 +197,9 @@ void ofApp::mouseDragged(int x, int y, int button) {
 void ofApp::mousePressed(int x, int y, int button) {
 	
 	canvas.mousePressed(x, y, button);
-	
+	if (thumbnailBounds.inside(x, y)) {
+		canvas.selectionEnabled = false;
+	}
 	for(auto thumbnail : thumbnails) {
 		thumbnail->mousePressed(x, y, button);
 	}
@@ -207,11 +209,12 @@ void ofApp::mousePressed(int x, int y, int button) {
 void ofApp::mouseReleased(int x, int y, int button) {
 	
 	canvas.mouseReleased(x, y, button);
-
+	canvas.selectionEnabled = true;
+	
 	for(auto thumbnail : thumbnails) {
-		if(thumbnail->mouseReleased(x, y, button)) {
+		if(thumbnail->mouseReleased(x, y, button) && thumbnail->canDrop()) {
 			ofPoint dropPoint = canvas.toCanvas(x, y);
-			canvas.addShape(new Shape(thumbnail->ref, dropPoint.x, dropPoint.y));
+			canvas.addShape(thumbnail->ref, dropPoint.x, dropPoint.y);
 		}
 	}
 }

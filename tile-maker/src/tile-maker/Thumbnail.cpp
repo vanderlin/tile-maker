@@ -63,6 +63,10 @@ bool Thumbnail::mouseReleased(int _x, int _y, int button) {
 	return didDragAndDrop;
 }
 
+bool Thumbnail::canDrop() {
+	return (dragPos.y + height/2) > MIN_THUMBNAIL_DROP_Y;
+}
+
 void Thumbnail::draw() {
 	ofPushMatrix();
 	ofTranslate(x, y);
@@ -79,8 +83,14 @@ void Thumbnail::draw() {
 	ofDrawRectangle(0, 0, width, height);
 	ofPopMatrix();
 	if(isPressed) {
-		ofSetColor(255, 100);
-		ref->image.draw(dragPos.x, dragPos.y, width, height);
+		ofSetColor(255, canDrop() ? 200 : 100);
+		if(AppSettings::drawImages) {
+			ref->image.draw(dragPos.x, dragPos.y, width, height);
+		}
+		else {
+			ofFill();
+			ofDrawRectangle(dragPos.x, dragPos.y, width, height);
+		}		
 	}
 }
 

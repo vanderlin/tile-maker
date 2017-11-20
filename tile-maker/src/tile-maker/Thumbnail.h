@@ -21,6 +21,7 @@ namespace TileMaker {
 		bool isOver, isPressed, didDrop;
 		Thumbnail(Asset * _ref);
 		
+		bool canDrop();
 		void mouseMoved(int _x, int _y );
 		void mouseDragged(int _x, int _y, int button);
 		void mousePressed(int _x, int _y, int button);
