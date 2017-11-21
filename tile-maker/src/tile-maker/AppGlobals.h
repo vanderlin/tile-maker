@@ -31,6 +31,7 @@ enum {
 class AppSettings {
 public:
 	static ofParameter<bool> drawImages;
+	static ofParameter<bool> debug;
 	static ofParameter<float> worldScale;
 };
 

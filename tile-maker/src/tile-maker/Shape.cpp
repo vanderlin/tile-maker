@@ -20,15 +20,14 @@ Shape::Shape(Asset * _ref, float _x, float _y, float _angle) {
 	height = ref->getHeight();
 	init();
 }
-Shape::Shape(Shape * mom) {
-	x = mom->x;
-	y = mom->y;
-	ref = mom->ref;
-	angle = mom->angle;
-	width = mom->width;
-	height = mom->height;
-	canvasRef = mom->canvasRef;
-	init();
+
+Shape Shape::clone() {
+	Shape c = Shape(ref, x, y, angle);
+	c.width = width;
+	c.height = height;
+	c.canvasRef = canvasRef;
+	c.init();
+	return c;
 }
 
 void Shape::init() {
@@ -48,6 +47,8 @@ void Shape::init() {
 	corners[CORNER_BR] = rect.getBottomRight();
 	corners[CORNER_BL] = rect.getBottomLeft();
 	updateCorners();
+	
+	ranColor = ofRandomColor();
 }
 //--------------------------------------------------------------
 ofVec2f Shape::getPosition() {
@@ -208,11 +209,12 @@ bool Shape::mouseMoved(int _x, int _y ) {
 
 //--------------------------------------------------------------
 void Shape::mouseDragged(int _x, int _y, int button) {
+	ofPoint mouse = Canvas::getScaledMouse();
+	ofPoint prevMouse = Canvas::getPreviousScaledMouse();
 	
 	if (isPressed) {
-		//setPosition(_x - downPos.x, _y - downPos.y);
-		ofPoint diff = mouse - prevMouse;
-		move(diff.x, diff.y);
+		ofPoint diff = Canvas::getDiffScaledMouse();
+		move(-diff.x, -diff.y);
 	}
 	else if (cornerIndex != -1) {
 		
@@ -313,6 +315,7 @@ void Shape::drawRaw() {
 //--------------------------------------------------------------
 void Shape::draw() {
 	
+	ofPoint mouse = Canvas::getScaledMouse();
 	ofPoint pos = getPosition();
 	
 	ofPushMatrix();
@@ -321,6 +324,11 @@ void Shape::draw() {
 	ofSetColor(255);
 	if (AppSettings::drawImages && ref) {
 		ref->image.draw(-width/2, -height/2, width, height);
+	}
+	if(AppSettings::debug) {
+		ofFill();
+		ofSetColor(ranColor, 100);
+		ofDrawRectangle(-width/2, -height/2, width, height);
 	}
 	ofPopMatrix();
 
@@ -353,6 +361,10 @@ void Shape::draw() {
 		ofSetRectMode(OF_RECTMODE_CENTER);
 		ofDrawRectangle(pnt, 10, 10);
 		ofSetRectMode(OF_RECTMODE_CORNER);
+	}
+	
+	if(AppSettings::debug) {
+		ofDrawBitmapStringHighlight(ofToString(orderIndex), x, y);
 	}
 	
 	if (isScaling && cornerIndex != -1) {

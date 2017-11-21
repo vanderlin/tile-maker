@@ -22,12 +22,12 @@ void Cursor::setup() {
 	types[CURSOR_HAND] = ofImage("cursors/Cur_Hand_11_11.png");
 	types[CURSOR_POINTER] = ofImage("icons/pointer-cursor.png");
 	types[CURSOR_ADD] = ofImage("icons/add-cursor.png");
+	types[CURSOR_MOVE_COPY] = ofImage("cursors/Cur_MoveCopy_1_1.png");
 	
 	types[CURSOR_ROTATE_TR] = ofImage("cursors/Cur_RotateTopRightCorner_7_7.png");
 	types[CURSOR_ROTATE_TL] = ofImage("cursors/Cur_RotateTopLeftCorner_7_7.png");
 	types[CURSOR_ROTATE_BR] = ofImage("cursors/Cur_RotateBottomRightCorner_7_7.png");
 	types[CURSOR_ROTATE_BL] = ofImage("cursors/Cur_RotateBottomLeftCorner_7_7.png");
-	
 	
 	types[CURSOR_SCALE_TR] = ofImage("cursors/Cur_ScaleTRBL_9_9.png");
 	types[CURSOR_SCALE_TL] = ofImage("cursors/Cur_ScaleTLBR_9_9.png");

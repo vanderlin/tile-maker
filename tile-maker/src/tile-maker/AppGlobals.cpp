@@ -7,6 +7,6 @@
 //
 
 #include "AppGlobals.h"
-
+ofParameter<bool> AppSettings::debug = true;
 ofParameter<bool> AppSettings::drawImages;
 ofParameter<float> AppSettings::worldScale;

@@ -1,4 +1,4 @@
-<canvas scale="0.178521" x="-424.999" y="166.582">
+<canvas scale="0.257604" x="-725.999" y="199.582">
 	<artboard>
 		<x>3817.58</x>
 		<y>-199.366</y>
@@ -52,10 +52,10 @@
 		</shape>
 		<shape>
 			<filename>assets/crops/export-13.png</filename>
-			<x>4415.6</x>
-			<y>983.356</y>
-			<width>311</width>
-			<height>514.139</height>
+			<x>6314.54</x>
+			<y>423.198</y>
+			<width>121</width>
+			<height>200.035</height>
 			<rotation>38.1604</rotation>
 			<ratio>1.65318</ratio>
 			<org_width>346</org_width>
@@ -459,10 +459,10 @@
 		</shape>
 		<shape>
 			<filename>assets/crops/export-13.png</filename>
-			<x>5573.57</x>
-			<y>1111.45</y>
-			<width>346</width>
-			<height>572</height>
+			<x>6845.13</x>
+			<y>652.12</y>
+			<width>150</width>
+			<height>247.977</height>
 			<rotation>0</rotation>
 			<ratio>1.65318</ratio>
 			<org_width>346</org_width>
@@ -533,6 +533,83 @@
 			<ratio>1.19134</ratio>
 			<org_width>439</org_width>
 			<org_height>523</org_height>
+		</shape>
+		<shape>
+			<filename>assets/crops/export-13.png</filename>
+			<x>4930.95</x>
+			<y>815.309</y>
+			<width>121</width>
+			<height>200.035</height>
+			<rotation>38.1604</rotation>
+			<ratio>1.65318</ratio>
+			<org_width>346</org_width>
+			<org_height>572</org_height>
+		</shape>
+		<shape>
+			<filename>assets/crops/export-13.png</filename>
+			<x>5556.77</x>
+			<y>607.308</y>
+			<width>150</width>
+			<height>247.977</height>
+			<rotation>0</rotation>
+			<ratio>1.65318</ratio>
+			<org_width>346</org_width>
+			<org_height>572</org_height>
+		</shape>
+		<shape>
+			<filename>assets/crops/export-13.png</filename>
+			<x>5994.59</x>
+			<y>648.386</y>
+			<width>121</width>
+			<height>200.035</height>
+			<rotation>38.1604</rotation>
+			<ratio>1.65318</ratio>
+			<org_width>346</org_width>
+			<org_height>572</org_height>
+		</shape>
+		<shape>
+			<filename>assets/crops/export-13.png</filename>
+			<x>6287.36</x>
+			<y>19.4775</y>
+			<width>121</width>
+			<height>200.035</height>
+			<rotation>38.1604</rotation>
+			<ratio>1.65318</ratio>
+			<org_width>346</org_width>
+			<org_height>572</org_height>
+		</shape>
+		<shape>
+			<filename>assets/crops/export-13.png</filename>
+			<x>6817.96</x>
+			<y>248.4</y>
+			<width>150</width>
+			<height>247.977</height>
+			<rotation>0</rotation>
+			<ratio>1.65318</ratio>
+			<org_width>346</org_width>
+			<org_height>572</org_height>
+		</shape>
+		<shape>
+			<filename>assets/crops/export-13.png</filename>
+			<x>5529.59</x>
+			<y>203.587</y>
+			<width>150</width>
+			<height>247.977</height>
+			<rotation>0</rotation>
+			<ratio>1.65318</ratio>
+			<org_width>346</org_width>
+			<org_height>572</org_height>
+		</shape>
+		<shape>
+			<filename>assets/crops/export-13.png</filename>
+			<x>6134.34</x>
+			<y>760.962</y>
+			<width>121</width>
+			<height>200.035</height>
+			<rotation>38.1604</rotation>
+			<ratio>1.65318</ratio>
+			<org_width>346</org_width>
+			<org_height>572</org_height>
 		</shape>
 	</shapes>
 </canvas>

@@ -41,11 +41,15 @@ namespace TileMaker {
 		
 		ofParameter<bool> editArtboard;
 		float x, y;
-		bool commandIsPressed;
-		bool shiftIsPressed;
+		
+		bool commandKeyPressed;
+		bool shiftKeyPressed;
+		bool optionKeyPressed;
 		bool pressedShapeInSelection;
 		bool pressedInsideShapes;
 		bool selectionEnabled;
+		
+		bool didCopy;
 		
 		ofRectangle selectionRect;
 		vector<Shape*> selectionGroup;
@@ -61,7 +65,7 @@ namespace TileMaker {
 		int shapeCount;
 		
 		Canvas();
-		Shape * addShape(Asset * ref, float x, float y);
+		Shape * addShape(Shape shape);
 		void setSize(int w, int h);
 		bool isPanning();
 		

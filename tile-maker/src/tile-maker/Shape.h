@@ -18,7 +18,7 @@ namespace TileMaker {
 	// --------------------------------
 	class Shape {
 	private:
-		
+		ofColor ranColor;
 	public:
 		Canvas * canvasRef;
 		Asset * ref;
@@ -26,7 +26,6 @@ namespace TileMaker {
 		bool isSelected;
 		bool isOver, isPressed;
 		bool canRotate, isScaling;
-		ofPoint prevMouse, mouse;
 		ofPoint downPos, downMouse;
 		ofPoint downRotatePos;
 		ofPoint worldOffset;
@@ -42,7 +41,7 @@ namespace TileMaker {
 		ofPolyline corners;
 		
 		Shape(Asset * _ref, float _x=0, float _y=0, float _angle=0);
-		Shape(Shape * mom);
+		Shape clone();
 		void init();
 		
 		ofVec2f getPosition();

@@ -147,10 +147,9 @@ void ofApp::keyPressed(int key){
 		if (key == 't') {
 			hideGui = !hideGui;
 		}
-		if (canvas.commandIsPressed && key == 's') {
+		if (canvas.commandKeyPressed && key == 's') {
 			save();
 		}
-		
 		
 	}
 }
@@ -214,7 +213,7 @@ void ofApp::mouseReleased(int x, int y, int button) {
 	for(auto thumbnail : thumbnails) {
 		if(thumbnail->mouseReleased(x, y, button) && thumbnail->canDrop()) {
 			ofPoint dropPoint = canvas.toCanvas(x, y);
-			canvas.addShape(thumbnail->ref, dropPoint.x, dropPoint.y);
+			canvas.addShape(Shape(thumbnail->ref, dropPoint.x, dropPoint.y));
 		}
 	}
 }

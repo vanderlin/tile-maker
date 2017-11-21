@@ -32,6 +32,8 @@ namespace TileMaker {
 			CURSOR_SCALE_TL,
 			CURSOR_SCALE_TR,
 			
+			CURSOR_MOVE_COPY
+			
 		};
 		static int mode;
 		static map <int, ofImage> types;

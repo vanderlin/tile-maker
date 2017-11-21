@@ -21,20 +21,24 @@ Canvas::Canvas() {
 	editArtboard = false;
 	shapeCount = 0;
 	enablePan = false;
-	commandIsPressed = false;
+	didCopy = false;
+	
 	selectionEnabled = true;
 	AppSettings::worldScale = 1;
 	minZoom = 0.2; maxZoom = 50;
+	
+	commandKeyPressed = false;
+	shiftKeyPressed = false;
+	optionKeyPressed = false;
 }
 
 #pragma mark - adding shapes
 //--------------------------------------------------------------
-Shape * Canvas::addShape(Asset * ref, float x, float y) {
-	shapes.push_back(Shape(ref, x, y));
-	Shape * shape = &shapes.back();
-	shape->canvasRef = this;
-	shape->orderIndex = shapeCount;
-	
+Shape * Canvas::addShape(Shape shape) {
+	shapes.push_back(shape);
+	Shape * ptr = &shapes.back();
+	ptr->canvasRef = this;
+	ptr->orderIndex = shapeCount;
 	shapeCount ++;
 	return &shapes.back();
 }
@@ -115,14 +119,17 @@ void Canvas::setSate(int index) {
 void Canvas::keyPressed(int key) {
 	
 	if(key == OF_KEY_COMMAND) {
-		commandIsPressed = true;
+		commandKeyPressed = true;
 	}
 	if(key == OF_KEY_SHIFT) {
-		shiftIsPressed = true;
+		shiftKeyPressed = true;
+	}
+	if(key == OF_KEY_ALT) {
+		optionKeyPressed = true;
 	}
 	
 	if (selectedShape) {
-		float amt = shiftIsPressed ? 10 : 1;
+		float amt = shiftKeyPressed ? 10 : 1;
 		if(key == OF_KEY_UP) {
 			selectedShape->move(0, -amt);
 		}
@@ -138,7 +145,7 @@ void Canvas::keyPressed(int key) {
 	}
 	
 	if (selectionGroup.size()) {
-		float amt = shiftIsPressed ? 10 : 1;
+		float amt = shiftKeyPressed ? 10 : 1;
 		if(key == OF_KEY_UP) {
 			for(auto& shape : selectionGroup) {
 				shape->move(0, -amt);
@@ -186,44 +193,47 @@ void Canvas::keyPressed(int key) {
 			shape.setRotation(0);
 		}
 	}
-	if (commandIsPressed && key == 's') {
+	if (commandKeyPressed && key == 's') {
 		save();
 	}
-	if (commandIsPressed && key == 'x') {
+	if (commandKeyPressed && key == 'x') {
 		fitToScreen();
 	}
-	if (commandIsPressed && key == 'e') {
+	if (commandKeyPressed && key == 'e') {
 		exportSVG();
 	}
-	if (commandIsPressed && key == 'a') {
+	if (commandKeyPressed && key == 'a') {
 		editArtboard = !editArtboard;
 	}
-	if (commandIsPressed && key == '1') {
+	if (commandKeyPressed && key == '1') {
 		setZoom(1);
 	}
-	if (!shiftIsPressed && commandIsPressed && key == 'z') {
+	if (!shiftKeyPressed && commandKeyPressed && key == 'z') {
 		if(historyIndex > 0) {
 			historyIndex --;
 		}
 		setSate(historyIndex);
 	}
-	if (shiftIsPressed && commandIsPressed && key == 'z') {
+	if (shiftKeyPressed && commandKeyPressed && key == 'z') {
 		if(historyIndex < history.size()-1) {
 			historyIndex ++;
 		}
 		setSate(historyIndex);
 	}
-	ofLogNotice() << historyIndex;
+	
 }
 
 //--------------------------------------------------------------
 void Canvas::keyReleased(int key) {
 	enablePan = false;
 	if(key == OF_KEY_COMMAND) {
-		commandIsPressed = false;
+		commandKeyPressed = false;
 	}
 	if(key == OF_KEY_SHIFT) {
-		shiftIsPressed = false;
+		shiftKeyPressed = false;
+	}
+	if(key == OF_KEY_ALT) {
+		optionKeyPressed = false;
 	}
 	for(auto shape : shapes) {
 		shape.canRotate = false;
@@ -235,7 +245,6 @@ void Canvas::keyReleased(int key) {
 void Canvas::mouseMoved(int _x, int _y ) {
 	ofPoint mouse = getScaledMouse();
 	
-	
 	if(editArtboard) {
 		artboard.mouseMoved(mouse.x, mouse.y);
 	}
@@ -245,8 +254,6 @@ void Canvas::mouseMoved(int _x, int _y ) {
 	else {
 		bool isInsideShape = false;
 		for(auto& shape : shapes) {
-			shape.mouse = getScaledMouse();
-			shape.prevMouse = getPreviousScaledMouse();
 			shape.isOver = false;
 		}
 		
@@ -261,14 +268,15 @@ void Canvas::mouseMoved(int _x, int _y ) {
 
 //--------------------------------------------------------------
 void Canvas::mouseDragged(int _x, int _y, int button) {
-	float scale = AppSettings::worldScale;
 	
+	float scale = AppSettings::worldScale;
 	ofPoint mouse = getScaledMouse();
 	ofPoint prevMouse = getPreviousScaledMouse();
 	ofPoint diffMouse = mouse - prevMouse;
-	
 	bool insideArtboard = artboard.inside(mouse.x, mouse.y);
 	
+	// if we are not panning and we pressed inside a selection
+	// group - we then just
 	if(!enablePan && pressedShapeInSelection) {
 		for(auto shape : selectionGroup) {
 			shape->move(diffMouse.x, diffMouse.y);
@@ -280,23 +288,32 @@ void Canvas::mouseDragged(int _x, int _y, int button) {
 		artboard.mouseDragged(mouse.x, mouse.y, prevMouse.x, prevMouse.y, button);
 	}
 	
+	// pan the world!
 	else if(enablePan) {
 		move(diffMouse.x * scale, diffMouse.y * scale);
 	}
 	
 	else {
 		
+		// group the selection rectangle
 		if (selectionGroup.size() == 0 && !pressedInsideShapes && selectionEnabled) {
 			selectionRect.width += diffMouse.x;
 			selectionRect.height += diffMouse.y;
 		}
+		
+		// we are draggin a single selected shape
 		else {
-			for(auto& shape : shapes) {
+			if(selectedShape) {
+				selectedShape->worldOffset.set(x, y);
+				selectedShape->mouseDragged(mouse.x, mouse.y, button);
+			}
+			/*for(auto& shape : shapes) {
 				shape.mouse = getScaledMouse();
 				shape.prevMouse = getPreviousScaledMouse();
 				shape.worldOffset.set(x, y);
 				shape.mouseDragged(mouse.x, mouse.y, button);
-			}
+			}*/
+			ofLogNotice() << selectedShape;
 		}
 	}
 }
@@ -306,7 +323,7 @@ void Canvas::mousePressed(int _x, int _y, int button) {
 	ofPoint mouse = getScaledMouse();
 	float scale = AppSettings::worldScale;
 	
-	// first just clear out the temp cache
+	// save the cuurent state of shapes
 	saveState();
 	
 	// are we in a selection group
@@ -319,7 +336,25 @@ void Canvas::mousePressed(int _x, int _y, int button) {
 		}
 	}
 	
+	// we pressed inside the selection group
 	if (pressedShapeInSelection) {
+		
+		// we are holding down option and want to copy the whole group
+		if(optionKeyPressed) {
+			Cursor::setMode(Cursor::CURSOR_MOVE_COPY);
+			vector<Shape*> tempCopy;
+			for (auto shape : selectionGroup) {
+				shape->isSelected = false;
+				Shape * clone = addShape(shape->clone());
+				clone->isSelected = true;
+				
+				tempCopy.push_back(clone);
+			}
+			selectionGroup.clear();
+			for (auto shape : tempCopy) {
+				selectionGroup.push_back(shape);
+			}
+		}
 		return;
 	}
 	
@@ -336,21 +371,23 @@ void Canvas::mousePressed(int _x, int _y, int button) {
 	
 	// panning the artboard
 	else if(enablePan) {
-		
+		// just return we do nothing
 		return;
 	}
 	
 	// just a press
 	else {
 		
+		// update the shapes
 		for(auto& shape : shapes) {
 			shape.isSelected = false;
 			shape.isPressed = false;
-			shape.mouse = getScaledMouse();
-			shape.prevMouse = getPreviousScaledMouse();
 		}
 		
+		// get the first shape that we press - by going
+		// backward untill we return true that we pressed shape
 		pressedInsideShapes = false;
+		
 		for(int i=shapes.size()-1; i>=0; i--) {
 			Shape& shape = shapes[i];
 			if(shape.mousePressed(mouse.x, mouse.y, button)) {
@@ -360,6 +397,21 @@ void Canvas::mousePressed(int _x, int _y, int button) {
 				break;
 			}
 		}
+		
+		// is the option key pressed and if so copy the shape
+		// and swap selected shape with new copy
+		if(optionKeyPressed && selectedShape) {
+			Cursor::setMode(Cursor::CURSOR_MOVE_COPY);
+			didCopy = true;
+			
+			selectedShape->isSelected = false;
+			Shape clone = selectedShape->clone();
+			selectedShape = addShape(clone);
+			selectedShape->mousePressed(mouse.x, mouse.y, button);
+			selectedShape->isSelected = true;
+
+		}
+		
 		if (!pressedInsideShapes && selectionEnabled) {
 			selectionRect.setPosition(mouse);
 			selectedShape = NULL;
@@ -379,13 +431,12 @@ void Canvas::mouseReleased(int _x, int _y, int button) {
 		}
 	}
 	
+	didCopy = false;
 	pressedInsideShapes = false;
 	ofPoint mouse = getScaledMouse();
 	artboard.mouseReleased(mouse.x, mouse.y, button);
 	for(auto& shape : shapes) {
-		shape.mouse = getScaledMouse();
-		shape.prevMouse = getPreviousScaledMouse();
-		shape.mouseReleased(_x, _y, button);
+		shape.mouseReleased(mouse.x, mouse.y, button);
 	}
 	
 	selectionRect.set(0, 0, 0, 0);
@@ -504,7 +555,7 @@ void Canvas::load(string filename) {
 				for(int i=0; i<nShapes; i++) {
 					Asset * asset = Asset::getWithFilename(xml.getValue<string>("filename"));
 					if (asset) {
-						Shape * shape = addShape(asset, 0, 0);
+						Shape * shape = addShape(Shape(asset, 0, 0));
 						ofLogNotice() << "shapes " << asset;
 						shape->setPosition(xml.getValue<float>("x"), xml.getValue<float>("y"));
 						shape->setSize(xml.getValue<float>("width"), xml.getValue<float>("height"));
@@ -580,8 +631,6 @@ void Canvas::drawAtScale(float sx, float sy) {
 void Canvas::update(ofRectangle bounds) {
 	worldRect = bounds;
 	for(auto& shape : shapes) {
-		shape.mouse = getScaledMouse();
-		shape.prevMouse = getPreviousScaledMouse();
 		shape.worldOffset.set(x, y);
 	}
 }
