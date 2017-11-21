@@ -317,6 +317,7 @@ void Shape::draw() {
 	
 	ofPoint mouse = Canvas::getScaledMouse();
 	ofPoint pos = getPosition();
+	bool isOverShape = inside(mouse.x, mouse.y);
 	
 	ofPushMatrix();
 	ofTranslate(pos);
@@ -325,28 +326,32 @@ void Shape::draw() {
 	if (AppSettings::drawImages && ref) {
 		ref->image.draw(-width/2, -height/2, width, height);
 	}
+	
 	if(AppSettings::debug) {
 		ofFill();
 		ofSetColor(ranColor, 100);
 		ofDrawRectangle(-width/2, -height/2, width, height);
 	}
+	
 	ofPopMatrix();
 
 	ofSetColor(0, isOver?255:220);
-	if(isSelected) {
+	if(isSelected || isOverShape) {
 		ofSetColor(COLOR_SELECTED);
 	}
 	corners.close();
 	corners.draw();
 
 	auto rects = getCornerRects();
+	float rectSize = SHAPE_CORNER_SIZE / AppSettings::worldScale;
 	int closeIndex = -1;
 	int minDis = 30;
 	
+	// draw the corners
 	for (int i=0; i<4; i++) {
 		ofPoint pnt(round(corners[i].x), round(corners[i].y));
 		ofSetColor(0);
-		//ofDrawBitmapString(ofToString(i), pnt);
+		
 		int overIndex = insideCorner(mouse.x, mouse.y);
 		if (overIndex == i) {
 			ofSetColor(0);
@@ -355,11 +360,11 @@ void Shape::draw() {
 		else {
 			ofSetColor(20);
 		}
-		if(isSelected) {
+		if(isSelected || isOverShape) {
 			ofSetColor(COLOR_SELECTED);
 		}
 		ofSetRectMode(OF_RECTMODE_CENTER);
-		ofDrawRectangle(pnt, 10, 10);
+		ofDrawRectangle(pnt, rectSize, rectSize);
 		ofSetRectMode(OF_RECTMODE_CORNER);
 	}
 	

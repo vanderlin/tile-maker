@@ -49,8 +49,6 @@ namespace TileMaker {
 		bool pressedInsideShapes;
 		bool selectionEnabled;
 		
-		bool didCopy;
-		
 		ofRectangle selectionRect;
 		vector<Shape*> selectionGroup;
 		Shape * selectedShape;

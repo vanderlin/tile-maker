@@ -21,7 +21,6 @@ Canvas::Canvas() {
 	editArtboard = false;
 	shapeCount = 0;
 	enablePan = false;
-	didCopy = false;
 	
 	selectionEnabled = true;
 	AppSettings::worldScale = 1;
@@ -402,7 +401,6 @@ void Canvas::mousePressed(int _x, int _y, int button) {
 		// and swap selected shape with new copy
 		if(optionKeyPressed && selectedShape) {
 			Cursor::setMode(Cursor::CURSOR_MOVE_COPY);
-			didCopy = true;
 			
 			selectedShape->isSelected = false;
 			Shape clone = selectedShape->clone();
@@ -422,6 +420,8 @@ void Canvas::mousePressed(int _x, int _y, int button) {
 //--------------------------------------------------------------
 void Canvas::mouseReleased(int _x, int _y, int button) {
 	
+	// we have made a selection - now look and see
+	// if a shape is inside the selection rectangle
 	if(selectionRect.getArea() > 0) {
 		for(auto& shape : shapes) {
 			if(selectionRect.intersects(shape.getRectangle())) {
@@ -431,12 +431,16 @@ void Canvas::mouseReleased(int _x, int _y, int button) {
 		}
 	}
 	
-	didCopy = false;
 	pressedInsideShapes = false;
 	ofPoint mouse = getScaledMouse();
 	artboard.mouseReleased(mouse.x, mouse.y, button);
+	
 	for(auto& shape : shapes) {
 		shape.mouseReleased(mouse.x, mouse.y, button);
+	}
+	if(selectedShape) {
+		selectedShape->isSelected = false;
+		selectedShape = nullptr;
 	}
 	
 	selectionRect.set(0, 0, 0, 0);
