@@ -117,6 +117,22 @@ void Canvas::setSate(int index) {
 	}
 }
 
+//--------------------------------------------------------------
+void Canvas::undo() {
+	if(historyIndex < history.size()-1) {
+		historyIndex ++;
+	}
+	setSate(historyIndex);
+}
+
+//--------------------------------------------------------------
+void Canvas::redo() {
+	if(historyIndex > 0) {
+		historyIndex --;
+	}
+	setSate(historyIndex);
+}
+
 #pragma mark - key input events
 //--------------------------------------------------------------
 void Canvas::keyPressed(int key) {
@@ -216,32 +232,44 @@ void Canvas::keyPressed(int key) {
 			shape.setRotation(0);
 		}
 	}
-	if (commandKeyPressed && key == 's') {
-		save();
-	}
-	if (commandKeyPressed && key == 'e') {
-		exportSVG();
-	}
-	if (commandKeyPressed && key == 'a') {
-		editArtboard = !editArtboard;
-	}
-	if (shiftKeyPressed && commandKeyPressed && key == '1') {
-		setZoom(1);
-	}
-	if (!shiftKeyPressed && commandKeyPressed && key == '1') {
-		fitToScreen();
-	}
-	if (!shiftKeyPressed && commandKeyPressed && key == 'z') {
-		if(historyIndex > 0) {
-			historyIndex --;
+	
+	
+	// shift + command
+	if (shiftKeyPressed && commandKeyPressed) {
+		if(key == 'a') {
+			editArtboard = !editArtboard;
 		}
-		setSate(historyIndex);
-	}
-	if (shiftKeyPressed && commandKeyPressed && key == 'z') {
-		if(historyIndex < history.size()-1) {
-			historyIndex ++;
+		if(key == '1') {
+			setZoom(1);
 		}
-		setSate(historyIndex);
+		if(key == '1') {
+			setZoom(1);
+		}
+		if(key == 'z') {
+			redo();
+		}
+		if(key == 'd') {
+			deselectAll();
+		}
+	}
+	
+	// command
+	if(!shiftKeyPressed && commandKeyPressed) {
+		if(key == 'a') {
+			selectAll();
+		}
+		if(key == '1') {
+			fitToScreen();
+		}
+		if(key == 'z') {
+			undo();
+		}
+		if(key == 'e') {
+			exportSVG();
+		}
+		if(key == 's') {
+			save();
+		}
 	}
 	
 }
@@ -281,6 +309,21 @@ bool Canvas::isShapeInSelection(Shape &shape) {
 	return false;
 }
 
+//--------------------------------------------------------------
+void Canvas::selectAll() {
+	selectionGroup.clear();
+	for(auto& shape : shapes) {
+		shape.isSelected = true;
+		selectionGroup.push_back(&shape);
+	}
+}
+//--------------------------------------------------------------
+void Canvas::deselectAll() {
+	selectionGroup.clear();
+	for(auto& shape : shapes) {
+		shape.isSelected = false;
+	}
+}
 #pragma mark - Mouse events
 //--------------------------------------------------------------
 void Canvas::mouseMoved(int _x, int _y ) {

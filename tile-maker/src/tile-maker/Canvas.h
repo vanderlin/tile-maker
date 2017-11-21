@@ -38,6 +38,8 @@ namespace TileMaker {
 		vector <History> history;
 		void saveState();
 		void setSate(int index);
+		void undo();
+		void redo();
 		
 		ofParameter<bool> editArtboard;
 		float x, y;
@@ -53,6 +55,8 @@ namespace TileMaker {
 		vector<Shape*> selectionGroup;
 		Shape * selectedShape;
 		bool isShapeInSelection(Shape &shape);
+		void selectAll();
+		void deselectAll();
 		
 		Artboard artboard;
 		bool pressedInsideArtboard;

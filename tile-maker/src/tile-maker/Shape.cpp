@@ -337,9 +337,7 @@ void Shape::draw() {
 	if(isSelected || isOver) {
 		ofSetColor(COLOR_SELECTED);
 	}
-	if(orderIndex==28) {
-		ofLogNotice() << orderIndex << "sel " << isSelected;
-	}
+
 	corners.close();
 	corners.draw();
 
