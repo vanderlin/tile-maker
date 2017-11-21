@@ -171,6 +171,6 @@ void Artboard::draw() {
 	ofDrawRectangle(x-pad, y-pad, (width)+(pad*2), (height)+(pad*2));
 	
 	ofSetColor(120);
-	ofDrawBitmapString(ofToString(width,0)+"x"+ofToString(height,0), x, y + (height) + 15);
+	ofDrawBitmapString(ofToString(width,0)+"x"+ofToString(height,0), x, (y + height) + (15 / AppSettings::worldScale));
 }
 

@@ -31,6 +31,7 @@ Shape Shape::clone() {
 }
 
 void Shape::init() {
+	shouldRemove = false;
 	isOver = false;
 	isPressed = false;
 	canRotate = false;
@@ -258,7 +259,6 @@ void Shape::mouseDragged(int _x, int _y, int button) {
 				w = ref->getWidth();
 			}
 			
-			ofLogNotice() << w;
 			float nw = w;
 			float nh = nw * ratio;
 			
@@ -283,7 +283,6 @@ bool Shape::mousePressed(int _x, int _y, int button) {
 		updateCursor(cornerIndex);
 	}
 	
-	ofLogNotice() << cornerIndex;
 	downRect = getRectangle();
 	downPos = ofPoint(_x, _y) - getPosition();
 	downMouse = ofPoint(_x, _y);
@@ -317,7 +316,6 @@ void Shape::draw() {
 	
 	ofPoint mouse = Canvas::getScaledMouse();
 	ofPoint pos = getPosition();
-	bool isOverShape = inside(mouse.x, mouse.y);
 	
 	ofPushMatrix();
 	ofTranslate(pos);
@@ -336,8 +334,11 @@ void Shape::draw() {
 	ofPopMatrix();
 
 	ofSetColor(0, isOver?255:220);
-	if(isSelected || isOverShape) {
+	if(isSelected || isOver) {
 		ofSetColor(COLOR_SELECTED);
+	}
+	if(orderIndex==28) {
+		ofLogNotice() << orderIndex << "sel " << isSelected;
 	}
 	corners.close();
 	corners.draw();
@@ -360,7 +361,7 @@ void Shape::draw() {
 		else {
 			ofSetColor(20);
 		}
-		if(isSelected || isOverShape) {
+		if(isSelected || isOver) {
 			ofSetColor(COLOR_SELECTED);
 		}
 		ofSetRectMode(OF_RECTMODE_CENTER);

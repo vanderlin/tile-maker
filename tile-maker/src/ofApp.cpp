@@ -59,7 +59,10 @@ void ofApp::update() {
 		x += thumbnail->getWidth();
 	}
 	
-	canvas.update(ofRectangle(UI_WIDTH, thumbnailBounds.height, ofGetWidth()-UI_WIDTH, ofGetHeight()-thumbnailBounds.height));
+	canvas.update(ofRectangle(UI_WIDTH,
+							  thumbnailBounds.height,
+							  ofGetWidth()-UI_WIDTH,
+							  ofGetHeight()-(thumbnailBounds.height+BOTTOM_UI_BAR_HEIGHT)));
 }
 
 //--------------------------------------------------------------
@@ -105,6 +108,18 @@ void ofApp::draw() {
 	
 	// app cursor
 	Cursor::draw();
+	
+	/*
+    // draw the whole canvas world rect
+	ofSetColor(255, 0, 10, 100);
+	ofFill();
+	ofDrawRectangle(canvas.worldRect);
+	*/
+	
+	ofSetColor(COLOR_UI_BACKGROUND);
+	ofFill();
+	ofDrawRectangle(0, canvas.worldRect.getBottom(), ofGetWidth(), BOTTOM_UI_BAR_HEIGHT);
+	
 }
 
 //--------------------------------------------------------------
@@ -115,6 +130,8 @@ void ofApp::load() {
 	if(settings.load("settings.xml")) {
 		settings.setTo("app");
 		ofSetWindowShape(getValueFromXml(settings, "window_width", DEFAULT_WINDOW_WIDTH), getValueFromXml(settings, "window_height", DEFAULT_WINDOW_HEIGHT));
+		ofSetWindowPosition(getValueFromXml(settings, "window_x", 20),
+							getValueFromXml(settings, "window_y", 20));
 	}
 }
 void ofApp::save() {
@@ -124,6 +141,8 @@ void ofApp::save() {
 	settings.setTo("app");
 	settings.addValue("window_width", (int)ofGetWindowWidth());
 	settings.addValue("window_height", (int)ofGetWindowHeight());
+	settings.addValue("window_x", (int)ofGetWindowPositionX());
+	settings.addValue("window_y", (int)ofGetWindowPositionY());
 	settings.save("settings.xml");
 }
 
@@ -161,7 +180,6 @@ void ofApp::keyReleased(int key){
 }
 
 //--------------------------------------------------------------
-ofPoint prevPt;
 void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
 	if(scrollY > 0 || scrollY < 0) {
 		double range = 0.01;

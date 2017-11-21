@@ -11,6 +11,10 @@
 
 using namespace TileMaker;
 
+bool Canvas::shouldRemoveShape(Shape &shape) {
+	return shape.shouldRemove;
+}
+
 //--------------------------------------------------------------
 Canvas::Canvas() {
 	historyIndex = -1;
@@ -24,7 +28,7 @@ Canvas::Canvas() {
 	
 	selectionEnabled = true;
 	AppSettings::worldScale = 1;
-	minZoom = 0.2; maxZoom = 50;
+	minZoom = 0.01; maxZoom = 50;
 	
 	commandKeyPressed = false;
 	shiftKeyPressed = false;
@@ -127,6 +131,26 @@ void Canvas::keyPressed(int key) {
 		optionKeyPressed = true;
 	}
 	
+	// delete
+	if(key == OF_KEY_DEL || key == OF_KEY_BACKSPACE) {
+		saveState();
+		
+		if(selectedShape) {
+			selectedShape->shouldRemove = true;
+			selectedShape = nullptr;
+		}
+		
+		for(auto shape : selectionGroup) {
+			shape->shouldRemove = true;
+		}
+		selectionGroup.clear();
+		
+		// call house keeper
+		ofRemove(shapes, shouldRemoveShape);
+		
+		ofLogNotice() << "delete shape";
+	}
+	
 	if (selectedShape) {
 		float amt = shiftKeyPressed ? 10 : 1;
 		if(key == OF_KEY_UP) {
@@ -195,17 +219,17 @@ void Canvas::keyPressed(int key) {
 	if (commandKeyPressed && key == 's') {
 		save();
 	}
-	if (commandKeyPressed && key == 'x') {
-		fitToScreen();
-	}
 	if (commandKeyPressed && key == 'e') {
 		exportSVG();
 	}
 	if (commandKeyPressed && key == 'a') {
 		editArtboard = !editArtboard;
 	}
-	if (commandKeyPressed && key == '1') {
+	if (shiftKeyPressed && commandKeyPressed && key == '1') {
 		setZoom(1);
+	}
+	if (!shiftKeyPressed && commandKeyPressed && key == '1') {
+		fitToScreen();
 	}
 	if (!shiftKeyPressed && commandKeyPressed && key == 'z') {
 		if(historyIndex > 0) {
@@ -239,7 +263,25 @@ void Canvas::keyReleased(int key) {
 	}
 }
 
-#pragma mark - mouse events
+#pragma mark - Selection
+//--------------------------------------------------------------
+bool Canvas::isShapeInSelection(Shape &shape) {
+	vector <ofPoint> pts;
+	pts.push_back(selectionRect.getTopLeft());
+	pts.push_back(selectionRect.getTopRight());
+	pts.push_back(selectionRect.getBottomRight());
+	pts.push_back(selectionRect.getBottomLeft());
+	pts.push_back(selectionRect.getTopLeft());
+	ofPolyline poly(pts);
+	for (auto pt : shape.corners) {
+		if(poly.inside(pt)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+#pragma mark - Mouse events
 //--------------------------------------------------------------
 void Canvas::mouseMoved(int _x, int _y ) {
 	ofPoint mouse = getScaledMouse();
@@ -255,7 +297,6 @@ void Canvas::mouseMoved(int _x, int _y ) {
 		for(auto& shape : shapes) {
 			shape.isOver = false;
 		}
-		
 		for(int i=shapes.size()-1; i>=0; i--) {
 			Shape& shape = shapes[i];
 			if(shape.mouseMoved(mouse.x, mouse.y)) {
@@ -298,6 +339,15 @@ void Canvas::mouseDragged(int _x, int _y, int button) {
 		if (selectionGroup.size() == 0 && !pressedInsideShapes && selectionEnabled) {
 			selectionRect.width += diffMouse.x;
 			selectionRect.height += diffMouse.y;
+			
+			for(auto& shape : shapes) {
+				if(isShapeInSelection(shape)) {
+					shape.isSelected = true;
+				}
+				else {
+					shape.isSelected = false;
+				}
+			}
 		}
 		
 		// we are draggin a single selected shape
@@ -312,7 +362,6 @@ void Canvas::mouseDragged(int _x, int _y, int button) {
 				shape.worldOffset.set(x, y);
 				shape.mouseDragged(mouse.x, mouse.y, button);
 			}*/
-			ofLogNotice() << selectedShape;
 		}
 	}
 }
@@ -343,11 +392,13 @@ void Canvas::mousePressed(int _x, int _y, int button) {
 			Cursor::setMode(Cursor::CURSOR_MOVE_COPY);
 			vector<Shape*> tempCopy;
 			for (auto shape : selectionGroup) {
-				shape->isSelected = false;
 				Shape * clone = addShape(shape->clone());
 				clone->isSelected = true;
 				
 				tempCopy.push_back(clone);
+			}
+			for (auto shape : selectionGroup) {
+				shape->isSelected = false;
 			}
 			selectionGroup.clear();
 			for (auto shape : tempCopy) {
@@ -424,7 +475,7 @@ void Canvas::mouseReleased(int _x, int _y, int button) {
 	// if a shape is inside the selection rectangle
 	if(selectionRect.getArea() > 0) {
 		for(auto& shape : shapes) {
-			if(selectionRect.intersects(shape.getRectangle())) {
+			if(isShapeInSelection(shape)) {
 				shape.isSelected = true;
 				selectionGroup.push_back(&shape);
 			}
@@ -438,10 +489,6 @@ void Canvas::mouseReleased(int _x, int _y, int button) {
 	for(auto& shape : shapes) {
 		shape.mouseReleased(mouse.x, mouse.y, button);
 	}
-	if(selectedShape) {
-		selectedShape->isSelected = false;
-		selectedShape = nullptr;
-	}
 	
 	selectionRect.set(0, 0, 0, 0);
 }
@@ -449,12 +496,10 @@ void Canvas::mouseReleased(int _x, int _y, int button) {
 // set the zoom / scale of the canvas
 #pragma mark - zoom and fitting
 //--------------------------------------------------------------
-void Canvas::setZoom(float z) {
+float Canvas::setZoom(float z) {
 	AppSettings::worldScale = ofClamp(z, minZoom, maxZoom);
-}
-void Canvas::setZoom(ofParameter<float> z) {
-	minZoom = z.getMin(); maxZoom = z.getMax();
-	AppSettings::worldScale = ofClamp(z, minZoom, maxZoom);
+	ofLogNotice() << "zoom " << AppSettings::worldScale;
+	return AppSettings::worldScale;
 }
 
 //--------------------------------------------------------------
@@ -464,14 +509,22 @@ void Canvas::move(float _x, float _y) {
 }
 //--------------------------------------------------------------
 void Canvas::fitToScreen() {
-	float g = 10;
+	float g = 100;
 	float m = MIN(worldRect.width - g, worldRect.height - g);
 	float s = m / artboard.width;
-	float tileSize = artboard.width * s;
-	ofLogNotice() << "scale " << s << "\n" << "size " << tileSize << "x" << tileSize;
-	setZoom(s);
-	x = worldRect.x + (worldRect.width-tileSize)/2;
-	y = worldRect.y + (worldRect.height-tileSize)/2;
+	float scale = setZoom(s);
+
+	ofLogNotice() << "desired tile size = " << m;
+	ofLogNotice() << "artboard size = " << artboard.width;
+	ofLogNotice() << "world size = " << worldRect.width;
+	ofLogNotice() << "sacle size = " << s;
+
+	ofRectangle scaledArtboard = artboard.getRect();
+	scaledArtboard.x *= scale; scaledArtboard.width *= scale;
+	scaledArtboard.y *= scale; scaledArtboard.height *= scale;
+	 
+	x = (worldRect.x - scaledArtboard.x) + ((worldRect.width - scaledArtboard.width) * 0.5);
+	y = (worldRect.y - scaledArtboard.y) + ((worldRect.height - scaledArtboard.height) * 0.5);
 }
 
 // push and pop canvas

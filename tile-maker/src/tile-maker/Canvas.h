@@ -52,6 +52,7 @@ namespace TileMaker {
 		ofRectangle selectionRect;
 		vector<Shape*> selectionGroup;
 		Shape * selectedShape;
+		bool isShapeInSelection(Shape &shape);
 		
 		Artboard artboard;
 		bool pressedInsideArtboard;
@@ -74,6 +75,8 @@ namespace TileMaker {
 		static ofPoint getPreviousScaledMouse();
 		static ofPoint getDiffScaledMouse();
 		
+		static bool shouldRemoveShape(Shape &shape);
+		
 		ofPoint toCanvas(ofPoint pt);
 		ofPoint toCanvas(float _x, float _y);
 		
@@ -86,8 +89,7 @@ namespace TileMaker {
 		void mouseReleased(int _x, int _y, int button);
 		
 		// set the zoom / scale of the canvas
-		void setZoom(float z);
-		void setZoom(ofParameter<float> z);
+		float setZoom(float z);
 		void move(float _x, float _y);
 		void fitToScreen();
 		

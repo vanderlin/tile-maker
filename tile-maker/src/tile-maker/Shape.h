@@ -23,6 +23,7 @@ namespace TileMaker {
 		Canvas * canvasRef;
 		Asset * ref;
 		
+		bool shouldRemove;
 		bool isSelected;
 		bool isOver, isPressed;
 		bool canRotate, isScaling;
@@ -76,6 +77,7 @@ namespace TileMaker {
 		void mouseReleased(int _x, int _y, int button);
 		void draw();
 		void drawRaw();
+		
 	};
 }
 
